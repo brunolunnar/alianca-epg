@@ -1,0 +1,3 @@
+interface IButtonProps{
+    OnClick: ()=> void
+}
