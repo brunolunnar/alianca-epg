@@ -9,15 +9,15 @@ if (!process.env.EMAIL_HOST_USER || !process.env.EMAIL_HOST_PASSWORD) {
   throw new Error("As variáveis de ambiente EMAIL_HOST_USER e EMAIL_HOST_PASSWORD são necessárias.");
 }
 
-const emailHost = process.env.EMAIL_HOST || "smtp.gmail.com"; // Usando um valor padrão para o host, se não estiver definido
-const emailPort = parseInt(process.env.EMAIL_PORT || "587", 10); // Convertendo a porta para um número
+const emailHost = process.env.EMAIL_HOST || "smtp.gmail.com"; 
+const emailPort = parseInt(process.env.EMAIL_PORT || "587", 10);
 const emailHostUser = process.env.EMAIL_HOST_USER;
 const emailHostPassword = process.env.EMAIL_HOST_PASSWORD;
 
 const transporter = nodemailer.createTransport({
   host: emailHost,
   port: emailPort,
-  secure: emailPort === 465, // Defina como true se a porta for 465 (SSL)
+  secure: emailPort === 465,
   auth: {
     user: emailHostUser,
     pass: emailHostPassword,

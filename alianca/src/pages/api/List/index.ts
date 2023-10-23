@@ -1,4 +1,4 @@
-// Importe as bibliotecas necessárias
+
 
 import { Client, query } from "faunadb";
 import { NextApiRequest, NextApiResponse } from "next";

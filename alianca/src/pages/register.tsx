@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Select from "react-select";
 import { globalStyle } from "@/styles/global";
 import { RegisterContainer } from "@/styles/pages/Register";
@@ -7,18 +7,69 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { Button } from "@/components/button";
 import { register } from "module";
+
 globalStyle();
 
 export const Register = () => {
+  const [buttonClicked, setButtonClicked] = useState(false); 
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    whatsapp: "",
+    segmento: "",
+    colaboradores: "",
+    faturamento: "",
+  });
   const router = useRouter();
   const handleConfirm = () => {
     router.push("/login");
   };
 
+  const handleFormSubmit = async (event: { preventDefault: () => void; }) => {
+    event.preventDefault();
+
+    if (buttonClicked) {
+      // Evita múltiplos cliques
+      return;
+    }
+
+    try {
+      setButtonClicked(true); // Define o estado como true para desativar o botão
+
+      const response = await fetch("/api/Create", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        router.push("/login");
+      } else {
+        // Lida com erros aqui, se necessário
+      }
+    } catch (error) {
+      console.error("Erro ao fazer o registro:", error);
+    }
+  };
+
+
+  const handleChange = (event: { target: { name: any; value: any } }) => {
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
   const segmentoOptions = [
     { value: "Tecnologia da Informação", label: "Tecnologia da Informação" },
     { value: "Saúde e Medicina", label: "Saúde e Medicina" },
-    { value: "Finanças e Serviços Financeiros", label: "Finanças e Serviços Financeiros" },
+    {
+      value: "Finanças e Serviços Financeiros",
+      label: "Finanças e Serviços Financeiros",
+    },
     { value: "Alimentos e Bebidas", label: "Alimentos e Bebidas" },
     { value: "Varejo", label: "Varejo" },
     { value: "Energia", label: "Energia" },
@@ -32,12 +83,14 @@ export const Register = () => {
     { value: "Bens de Consumo", label: "Bens de Consumo" },
     { value: "Bens Industriais", label: "Bens Industriais" },
     { value: "Turismo e Hospitalidade", label: "Turismo e Hospitalidade" },
-    { value: "Meio Ambiente e Sustentabilidade", label: "Meio Ambiente e Sustentabilidade" },
+    {
+      value: "Meio Ambiente e Sustentabilidade",
+      label: "Meio Ambiente e Sustentabilidade",
+    },
     { value: "Telecomunicações", label: "Telecomunicações" },
     { value: "Arte e Cultura", label: "Arte e Cultura" },
     { value: "Setor Público", label: "Setor Público" },
   ];
-  
 
   const outraOpcaoOptions = [
     { value: "opcao01", label: "Até 10 mil" },
@@ -52,9 +105,8 @@ export const Register = () => {
     { value: "opcao10", label: "Até 100 mil" },
     { value: "opcao11", label: "Mais de 100 mil" },
   ];
-  
 
-  // Estilos personalizados
+
   const customStyles = {
     control: (base: any) => ({
       ...base,
@@ -62,8 +114,7 @@ export const Register = () => {
       border: "solid 3px #DA8A51", // Estilo da borda
       padding: "11px", // Preenchimento
       borderRadius: "30px", // Raio de borda
-      width:'300px'
-      
+      width: "300px",
     }),
     option: (styles: any, { isFocused, isSelected }: any) => ({
       ...styles,
@@ -73,34 +124,76 @@ export const Register = () => {
       border: "none",
     }),
   };
-
   return (
     <RegisterContainer>
-      <Image className="logo" src={LogoImg} alt={"Logotipo da empresa"}></Image>
+      <Image src={LogoImg} alt="Logotipo da empresa" />
       <div className="form-container">
         <h1>Responda para receber acesso</h1>
-        <form>
-          <input type="text" placeholder="Nome" />
-          <input type="email" placeholder="Seu melhor e-mail" />
-          <input type="number" placeholder="Número" />
+        <form onSubmit={handleFormSubmit}>
+          <input
+            type="text"
+            name="name"
+            placeholder="Nome"
+            value={formData.name}
+            onChange={handleChange}
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Seu melhor e-mail"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="whatsapp"
+            placeholder="WhatsApp"
+            value={formData.whatsapp}
+            onChange={handleChange}
+          />
 
           <div className="select-box">
             <Select
               options={segmentoOptions}
               placeholder="Segmento"
-              styles={customStyles} // Aplicação dos estilos personalizados
+              styles={customStyles}
+              name="segmento"
+              value={segmentoOptions.find(
+                (option) => option.value === formData.segmento
+              )}
+              onChange={(selectedOption) =>
+                setFormData({
+                  ...formData,
+                  segmento: selectedOption ? selectedOption.value : "",
+                })
+              }
             />
-
-            <input type="number" placeholder="Numero de Colaboradores" />
-
+          <input
+            type="text"
+            name="colaboradores"
+            placeholder="Colaboradores"
+            value={formData.colaboradores}
+            onChange={handleChange}
+          />
             <Select
               options={outraOpcaoOptions}
-              placeholder="Outra Opção"
-              styles={customStyles} // Aplicação dos estilos personalizados
+              placeholder="Faturamento"
+              styles={customStyles}
+              name="faturamento"
+              value={outraOpcaoOptions.find(
+                (option) => option.value === formData.faturamento
+              )}
+              onChange={(selectedOption) =>
+                setFormData({
+                  ...formData,
+                  faturamento: selectedOption ? selectedOption.value : "",
+                })
+              }
             />
           </div>
+
+          <Button type="submit" disable={buttonClicked}>Registrar</Button>
         </form>
-      <Button OnClick={handleConfirm} children={undefined}></Button>
       </div>
     </RegisterContainer>
   );

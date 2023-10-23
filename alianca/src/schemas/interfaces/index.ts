@@ -1,7 +1,9 @@
-interface IButtonProps{
-    OnClick: ()=> void;
-    children: React.ReactNode; 
-}
+interface IButtonProps {
+    OnClick?: () => void;
+    children?: React.ReactNode;
+    type?: "button" | "submit" | "reset"; 
+    disable?: boolean;
+  }
 interface IRegisterData {
     name: string;
     email: string;

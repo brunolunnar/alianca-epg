@@ -26,6 +26,7 @@ export const RegisterContainer = styled("main", {
     padding: "18px",
     borderRadius: "30px",
     color: "$white",
+    fontSize:'1.3rem'
   },
   "input::placeholder": {
     color: "$white",
