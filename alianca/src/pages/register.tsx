@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { Button } from "@/components/button";
 import { register } from "module";
+import { sendRegistrationEmail } from "@/utils/emailUtils";
 
 globalStyle();
 
@@ -27,15 +28,15 @@ export const Register = () => {
 
   const handleFormSubmit = async (event: { preventDefault: () => void; }) => {
     event.preventDefault();
+    const emailSent = await sendRegistrationEmail(formData.name, formData.email);
 
     if (buttonClicked) {
-      // Evita múltiplos cliques
+  
       return;
     }
 
     try {
-      setButtonClicked(true); // Define o estado como true para desativar o botão
-
+      setButtonClicked(true);
       const response = await fetch("/api/Create", {
         method: "POST",
         body: JSON.stringify(formData),
@@ -46,8 +47,6 @@ export const Register = () => {
 
       if (response.ok) {
         router.push("/login");
-      } else {
-        // Lida com erros aqui, se necessário
       }
     } catch (error) {
       console.error("Erro ao fazer o registro:", error);
