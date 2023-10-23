@@ -5,9 +5,14 @@ export const ButtonStyled = styled('button',{
     padding:'15px',
     borderRadius:'30px',
     fontWeight:'bolder',
+    marginTop:'2rem',
+    '@media(min-width:768px)':{
+        width:'100%'
+    },
     '@media(min-width:1024px)':{
         fontSize:'2rem',
         width:'100%',
-        marginTop:'1rem'
+        marginTop:'2rem',
+        marginBottom:'2rem',
     }
 })

@@ -8,19 +8,21 @@ import { Button } from "@/components/button";
 
 globalStyle();
 export default function Home() {
-  const router = useRouter()
-  const handleRouterRegister = ()=>{
-    router.push('/register')
+  const router = useRouter();
+  const handleRouterRegister = () => {
+    router.push("/register");
+  };
+  const handleRouterLogin = ()=>{
+    router.push("/login")
   }
 
   return (
     <>
       <HomeContainer>
-        <Image className="logo"
-          src={Logo}
-          alt="Logotipo da empresa"
-          ></Image>
-  
+        <Image className="logo" src={Logo} alt="Logotipo da empresa"></Image>
+        <div className="login-box" >
+          <button className="login-btn" onClick={handleRouterLogin}>Login</button>
+        </div>
         <section className="container">
           <h2>Empresário!</h2>
           <section>
@@ -73,7 +75,7 @@ export default function Home() {
             transformar sua trajetória empresarial!
           </article>
         </section>
-          <Button OnClick={handleRouterRegister}/>
+        <Button OnClick={handleRouterRegister} children={undefined} />
       </HomeContainer>
     </>
   );
