@@ -19,11 +19,14 @@ export const globalStyle = globalCss({
       lineHeight: 1,
       backgroundImage:'$main',
       fontFamily:"'Montserrat', sans-serif",
-      color:'$white',
+      color:'white',
       margin:'0 auto',
-      maxWidth:'1200px' 
+      maxWidth:'1200px', 
+
    
-   
+    },
+    input:{
+        color:'white'
     },
     "ol, ul": {
       listStyle: "none",

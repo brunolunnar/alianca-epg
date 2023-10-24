@@ -50,6 +50,7 @@ export const AliancaContainer = styled("main", {
     border: "3px solid $branch",
     borderRadius: "12px",
     minHeight: "102px",
+    color:'white'
   },
   button: {
     background: "radial-gradient(at center center, #E8BA98 0%, #D67D3F 100%);",
