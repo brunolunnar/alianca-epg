@@ -26,7 +26,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
       if (process.env.SECRET_KEY) {
         const token = jwt.sign({ email, name }, process.env.SECRET_KEY, {
-          expiresIn: "1h",
+          expiresIn: "8h",
         });
 
         res.status(200).json({ token });

@@ -4,7 +4,7 @@ import { LoginContainer } from "@/styles/pages/Login";
 import Image from "next/image";
 import { Button } from "@/components/button";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 globalStyle();
@@ -19,9 +19,9 @@ export const Login = () => {
     }
     try {
       const response = await axios.post("/api/Login", { email });
-  
+
       if (response.status === 200) {
-        localStorage.setItem("@TOKEN", response.data.token)
+        localStorage.setItem("@TOKEN", response.data.token);
         router.push("/alianca");
       } else {
         console.log("Erro de autenticação:", response.data.error);
@@ -30,9 +30,16 @@ export const Login = () => {
       console.error("Erro ao realizar o login:", error);
     }
   };
+  useEffect(() => {
+    const token = localStorage.getItem("@TOKEN");
 
+    if (token) {
+      router.push("/alianca");
+    }
+  }, []);
   return (
     <LoginContainer>
+      <Image className="logo" src={Logo} alt="Logotipo da empresa"></Image>
       <form onSubmit={(e) => e.preventDefault()}>
         <input
           type="email"

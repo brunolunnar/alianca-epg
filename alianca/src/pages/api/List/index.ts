@@ -1,5 +1,4 @@
 
-
 import { Client, query } from "faunadb";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -39,4 +38,4 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   } else {
     res.status(405).json({ error: "Método não permitido" });
   }
-};
+}

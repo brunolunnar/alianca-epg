@@ -12,7 +12,14 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 globalStyle();
-
+interface IFormData{
+  name: string,
+  email: string,
+  whatsapp: string,
+  segmento: string,
+  colaboradores: string,
+  faturamento: string,
+}
 export const Register = () => {
   const [buttonClicked, setButtonClicked] = useState(false);
   const [formData, setFormData] = useState<IFormData>({

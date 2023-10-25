@@ -1,46 +1,140 @@
+import { useEffect, useState, useRef } from "react";
 import { globalStyle } from "@/styles/global";
 import { useRouter } from "next/router";
 import Logo from "@/assets/img/logo.png";
 import Image from "next/image";
-import { FinalContainer } from "@/styles/pages/Final";
+import { AliancaContainer } from "@/styles/pages/Alianca";
+import ReactPlayer from "react-player";
+
 globalStyle();
-export const AliancaFinal = () => {
+
+export const AliancaInitial = () => {
+  const [userName, setUserName] = useState("");
   const router = useRouter();
-  const handleRouter = () => {
-    return router.push("/congratulations");
+  const [feedback, setFeedback] = useState({
+    "Por que valeu a pena essa aula": "",
+    "Quais decisões você toma": "",
+  });
+  const [hasToken, setHasToken] = useState(false);
+  const [videoWatched, setVideoWatched] = useState(false);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("@TOKEN");
+
+    if (token) {
+      setHasToken(true);
+    } else {
+      setHasToken(false);
+    }
+  }, []);
+
+  const handleRouter = async () => {
+    if (
+      feedback["Por que valeu a pena essa aula"] &&
+      feedback["Quais decisões você toma"] &&
+      hasToken &&
+      videoWatched
+    ) {
+      const token = localStorage.getItem("@TOKEN");
+
+      try {
+        const response = await fetch("/api/aula01", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(feedback),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          router.push("alianca/InProcess"); // Redireciona para a próxima página
+        } else {
+          console.error(
+            "Erro ao fazer a requisição para api/aula01:",
+            response.statusText
+          );
+        }
+      } catch (error) {
+        console.error("Erro ao fazer a requisição para api/aula01:", error);
+      }
+    } else {
+      alert(
+        "Por favor, preencha todos os campos e assista ao vídeo antes de avançar."
+      );
+    }
   };
+
+  const handleFormSubmit = async (e: any) => {
+    e.preventDefault();
+    handleRouter(); // Execute o código para enviar os dados do formulário e avançar para a próxima página
+  };
+
+  const handleVideoEnd = () => {
+    setVideoWatched(true);
+  };
+
   return (
-    <FinalContainer>
+    <AliancaContainer>
       <header>
         <Image className="logo" src={Logo} alt="logotipo da empresa" />
-        <div>3</div>
+        <div>1</div>
       </header>
       <div className="container">
-        <h1>Olá, Felipe!</h1>
+        <h1>Olá, {userName}</h1>
         <h3>
           Muito bom ver você aqui buscando se desenvolver e crescer como
           empresário.
         </h3>
         <div className="video-box">
-
-        <iframe
-          className="video"
-          src="https://www.youtube.com/embed/I0ScTwHJGoM"
-          allowFullScreen
-          ></iframe>
-        <form>
-          <label htmlFor="feedback">Por que valeu a pena essa aula?</label>
-          <textarea name="feedback" id="feedback"></textarea>
-          <label htmlFor="decisao">Quais decisões você toma?</label>
-          <textarea name="decisao" id="decisao"></textarea>
-        </form>
-        <div className="button-box">
-
-        <button onClick={handleRouter}>Liberar próxima aula!</button>
+          {typeof window !== "undefined" && (
+            <ReactPlayer
+              playing
+              controls={true}
+              onEnded={handleVideoEnd}
+              ref={videoRef}
+              width="100%"
+              url="https://www.youtube.com/watch?v=vkDMs4BcbNU"
+            />
+          )}
+          <form onSubmit={handleFormSubmit}>
+            <label htmlFor="feedback">Por que valeu a pena essa aula?</label>
+            <textarea
+              name="feedback"
+              id="feedback"
+              value={feedback["Por que valeu a pena essa aula"]}
+              onChange={(e) =>
+                setFeedback({
+                  ...feedback,
+                  "Por que valeu a pena essa aula": e.target.value,
+                })
+              }
+            ></textarea>
+            <label htmlFor="decisao">Quais decisões você toma?</label>
+            <textarea
+              name="decisao"
+              id="decisao"
+              value={feedback["Quais decisões você toma"]}
+              onChange={(e) =>
+                setFeedback({
+                  ...feedback,
+                  "Quais decisões você toma": e.target.value,
+                })
+              }
+            ></textarea>
+            <div className="button-box">
+              <button type="submit" disabled={!videoWatched}>
+                Liberar próxima aula!
+              </button>
+            </div>
+          </form>
         </div>
-          </div>
       </div>
-    </FinalContainer>
+    </AliancaContainer>
   );
-};      
-export default AliancaFinal;
+};
+
+export default AliancaInitial;
