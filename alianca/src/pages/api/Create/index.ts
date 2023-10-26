@@ -18,6 +18,7 @@ faunaClient.query(
   })
 );
 
+
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     try {

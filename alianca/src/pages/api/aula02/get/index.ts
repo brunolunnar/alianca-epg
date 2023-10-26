@@ -12,18 +12,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "GET") {
     try {
       const response = await faunaClient.query<{
-        data: any; // Substitua 'IAula1Response' pelo seu tipo de dados real
+        data: any;
       }>(
         query.Map(
-          query.Paginate(query.Documents(query.Collection("aula1"))),
+          query.Paginate(query.Documents(query.Collection("aula2"))),
           query.Lambda("X", query.Get(query.Var("X")))
         )
       );
 
-      const aula1Data = response.data.map((item:any) => ({
+      const aula1Data = response.data.map((item: any) => ({
         id: item.ref.id,
         ...item.data,
-        ref:"Aula-01",
+        ref: "Aula-02",
       }));
 
       res.status(200).json({ data: aula1Data });
@@ -31,9 +31,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       console.log(error);
       res
         .status(500)
-        .json({ error: "Ocorreu um erro ao recuperar os dados da coleção aula1." });
+        .json({
+          error: "Ocorreu um erro ao recuperar os dados da coleção aula1.",
+        });
     }
   } else {
     res.status(405).json({ error: "Método não permitido" });
   }
-}
+};

@@ -1,68 +1,93 @@
+import { Client, query } from "faunadb";
 import { NextApiRequest, NextApiResponse } from "next";
 
-interface CombinedData {
+interface Aula {
   id: string;
+  emailDoUser: string;
+  "Por que valeu a pena essa aula": string;
+  "Quais decisões você toma": string;
+}
+
+interface LeadData {
   name: string;
   email: string;
   whatsapp: string;
   segmento: string;
   colaboradores: string;
   faturamento: string;
-  Aula01?: Aula;
-  Aula02?: Aula;
-  Aula03?: Aula;
+  aulas: Record<string, Aula>;
+  data?: any;
+  organizedData?:Record<string, LeadData>
 }
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    whatsapp: string;
-    segmento: string;
-    colaboradores: string;
-    faturamento: string;
-  }
-  
-  interface Aula {
-    id: string;
-    emailDoUser: string;
-    "Por que valeu a pena essa aula?": string;
-    "Quais decisões você toma?": string;
-  }
-  
+
+if (!process.env.SECRET_KEY) {
+  throw new Error("A variável de ambiente SECRET_KEY não está definida.");
+}
+
+const faunaClient = new Client({ secret: process.env.SECRET_KEY });
+
+async function getAllDocuments(collectionName: string) {
+  const response = await faunaClient.query<any>(
+    query.Map(
+      query.Paginate(query.Documents(query.Collection(collectionName))),
+      query.Lambda("X", query.Get(query.Var("X")))
+    )
+  );
+  return response.data;
+}
+function mergeLeadDataWithAulas(leadData: LeadData[], aulaData: any[]) {
+  const organizedData: Record<string, LeadData> = {};
+
+  leadData.forEach((lead) => {
+    const email = lead.data.email;
+    if (!organizedData[email]) {
+      organizedData[email] = {
+        name: lead.data.name,
+        email: lead.data.email,
+        whatsapp: lead.data.whatsapp,
+        segmento: lead.data.segmento,
+        colaboradores: lead.data.colaboradores,
+        faturamento: lead.data.faturamento,
+        aulas: {},
+      };
+    }
+    aulaData.forEach((aula) => {
+      let um =+ 1
+      console.log(aula)
+      if (aula.data.emailDoUser === email) {
+        const aulaKey = `Aula${aula.ref}, ${um++} `;
+        organizedData[email].aulas[aulaKey] = {
+          id: aula.id,
+          emailDoUser: aula.data.emailDoUser,
+          "Por que valeu a pena essa aula": aula.data["Por que valeu a pena essa aula"],
+          "Quais decisões você toma": aula.data["Quais decisões você toma"],
+        };
+      }
+    });
+  });
+
+  return organizedData;
+}
+
+
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    // Obtenha os dados dos usuários
-    const usersResponse = await fetch("api/List");
-    const usersData: User[] = await usersResponse.json();
+    const leads = await getAllDocuments("leads");
+    const aula1Data = await getAllDocuments("aula1");
+    const aula2Data = await getAllDocuments("aula2");
+    const aula3Data = await getAllDocuments("aula3");
 
-    // Obtenha os dados das aulas
-    const aula01Response = await fetch("api/aula1");
-    console.log(aula01Response)
-    const aula02Response = await fetch("api/aula2");
-    console.log(aula02Response)
-    const aula03Response = await fetch("api/aula3");
-    console.log(aula03Response)
-    const aula01Data: Aula[] = await aula01Response.json();
-    const aula02Data: Aula[] = await aula02Response.json();
-    const aula03Data: Aula[] = await aula03Response.json();
+    const leadsWithAulas = mergeLeadDataWithAulas(leads, [
+      ...aula1Data,
+      ...aula2Data,
+      ...aula3Data,
+    ]);
 
-    // Combine os dados dos usuários com os dados das aulas
-    const combinedData: CombinedData[] = usersData.map((user) => {
-      const aula01 = aula01Data.find((aula) => aula.emailDoUser === user.email);
-      const aula02 = aula02Data.find((aula) => aula.emailDoUser === user.email);
-      const aula03 = aula03Data.find((aula) => aula.emailDoUser === user.email);
-
-      return {
-        ...user,
-        Aula01: aula01,
-        Aula02: aula02,
-        Aula03: aula03,
-      };
-    });
-
-    res.status(200).json({ data: combinedData });
+    res.status(200).json({ data: leadsWithAulas });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Ocorreu um erro ao recuperar os dados." });
+    console.error("Ocorreu um erro ao recuperar e combinar os dados:", error);
+    res
+      .status(500)
+      .json({ error: "Ocorreu um erro ao recuperar os dados combinados." });
   }
 };

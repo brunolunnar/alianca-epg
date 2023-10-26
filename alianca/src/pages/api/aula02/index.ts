@@ -1,6 +1,6 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { Client, query } from "faunadb";
-import jwt, { JwtPayload } from "jsonwebtoken"; // Importe JwtPayload
+import { NextApiRequest, NextApiResponse } from "next";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 if (!process.env.SECRET_KEY) {
   throw new Error("A variável de ambiente SECRET_KEY não está definida.");
@@ -20,11 +20,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           .status(401)
           .json({ error: "Token de autenticação não fornecido" });
       }
-      if (!process.env.SECRET_KEY) {
-        throw new Error("A variável de ambiente SECRET_KEY não está definida.");
-      }
-      const token = authHeader.split("Bearer ")[1];
 
+      const token = authHeader.split("Bearer ")[1];
+if (!process.env.SECRET_KEY) {
+  throw new Error("A variável de ambiente SECRET_KEY não está definida.");
+}
       if (token) {
         try {
           const decoded = jwt.verify(
@@ -36,7 +36,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           const data = req.body;
 
           const response = await faunaClient.query<any>(
-            query.Create(query.Collection("leads"), {
+            query.Create(query.Collection("aula2"), {
               data: {
                 emailDoUser,
                 ...data,
@@ -44,8 +44,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             })
           );
 
-          res.status(200).json({
-            Aula02: {
+          res.status(201).json({
+            Aula01: {
+              ref:"Aula-01",
               emailDoUser,
               id: response.ref.id,
               ...data,
@@ -62,7 +63,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       console.log(error);
       res
         .status(500)
-        .json({ error: "Ocorreu um erro ao cadastrar a pergunta." });
+        .json({ error: "Ocorreu um erro ao cadastrar na coleção aula1." });
     }
   } else {
     res.status(405).json({ error: "Método não permitido" });

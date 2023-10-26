@@ -1,12 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import { globalStyle } from "@/styles/global";
 import { useRouter } from "next/router";
 import Logo from "@/assets/img/logo.png";
 import Image from "next/image";
 import { AliancaContainer } from "@/styles/pages/Alianca";
 import ReactPlayer from "react-player";
-
-globalStyle();
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const AliancaInitial = () => {
   const [userName, setUserName] = useState("");
@@ -30,12 +29,10 @@ export const AliancaInitial = () => {
   }, []);
 
   const handleRouter = async () => {
-  
     if (feedback["Por que valeu a pena essa aula"] && feedback["Quais decisões você toma"] && hasToken && videoWatched) {
       const token = localStorage.getItem("@TOKEN");
   
-      // Tudo está pronto, então exibe o alerta de sucesso
-      alert("Pronto para avançar para a próxima aula!");
+      toast.success("Pronto para avançar para a próxima aula!");
   
       try {
         const response = await fetch("/api/aula01", {
@@ -50,26 +47,25 @@ export const AliancaInitial = () => {
         if (response.ok) {
           const data = await response.json();
           console.log(data);
-          router.push("alianca/InProcess"); // Redireciona para a próxima página
+          router.push("alianca/InProcess");
         } else {
-          console.error("Erro ao fazer a requisição para api/aula01:", response.statusText);
+          toast.error(`Erro ao fazer a requisição para api/aula01: ${response.statusText}`);
         }
       } catch (error) {
-        console.error("Erro ao fazer a requisição para api/aula01:", error);
+        toast.error(`Erro ao fazer a requisição para api/aula01: ${error}`);
       }
     } else {
-      alert("Por favor, preencha todos os campos e assista ao vídeo antes de avançar.");
+      toast.error("Por favor, preencha todos os campos e assista ao vídeo antes de avançar.");
     }
   };
   
-  const handleFormSubmit = async (e: any) => {
+  const handleFormSubmit = async (e:any) => {
     e.preventDefault();
     
     handleRouter(); 
     if (!videoWatched) {
-      console.log("Vídeo não foi assistido completamente.");
-      alert("Por favor, assista o vídeo completamente antes de avançar.");
-      return; // Impede que o código continue se o vídeo não foi assistido
+      toast.error("Vídeo não foi assistido completamente. Por favor, assista o vídeo completamente antes de avançar.");
+      return;
     }
   };
 
@@ -86,22 +82,19 @@ export const AliancaInitial = () => {
       <div className="container">
         <h1>Olá, {userName}</h1>
         <h3>
-          Muito bom ver você aqui buscando se desenvolver e crescer como
-          empresário.
+          Muito bom ver você aqui buscando se desenvolver e crescer como empresário.
         </h3>
         <div className="video-box">
-          {typeof window !== "undefined" && (
-            <div>
-              <ReactPlayer
-                playing
-                controls={true}
-                onEnded={handleVideoEnd}
-                ref={videoRef}
-                width="100%"
-                url="https://www.youtube.com/watch?v=vkDMs4BcbNU"
-              />
-            </div>
-          )}
+          <div>
+            <ReactPlayer
+              playing
+              controls={true}
+              onEnded={handleVideoEnd}
+              ref={videoRef}
+              width="100%"
+              url="https://www.youtube.com/watch?v=vkDMs4BcbNU"
+            />
+          </div>
           <form onSubmit={handleFormSubmit}>
             <label htmlFor="feedback">Por que valeu a pena essa aula?</label>
             <textarea
@@ -135,6 +128,7 @@ export const AliancaInitial = () => {
           </form>
         </div>
       </div>
+      <ToastContainer /> {/* Container para exibir as notificações "toast" */}
     </AliancaContainer>
   );
 };
