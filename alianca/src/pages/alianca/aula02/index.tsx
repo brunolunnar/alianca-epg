@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { FiLock } from "react-icons/fi";
 
 
 globalStyle();
@@ -47,51 +48,101 @@ export const AliancaInitial = () => {
       hasToken &&
       videoWatched
     ) {
-      const token = localStorage.getItem("@TOKEN");
+      if (user && typeof user !== "string" && user.id) {
+        try {
+          const responseAula1 = await fetch(`/api/att/aula2/${user.id}`, {
+            method: "PATCH",
+          });
 
-      try {
-        const response = await fetch("/api/aula02", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(feedback),
-        });
+          if (responseAula1.ok) {
+            const token = localStorage.getItem("@TOKEN");
+            const responseAula2 = await fetch("/api/aula02", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(feedback),
+            });
 
-        if (response.ok) {
-          const data = await response.json();
-          toast.success("Parabéns pelo avanço! ")
-          setTimeout(()=>{
-
-            router.push("/alianca/aula02");
-          },2000)
-        } else {
+            if (responseAula2.ok) {
+              toast.success("Parabéns pelo avanço!");
+              setTimeout(() => {
+                router.push("/alianca/aula03");
+              }, 2000);
+            } else {
+              console.error(
+                "Erro ao fazer a requisição para api/aula02:",
+                responseAula2.statusText
+              );
+            }
+          } else {
+            console.error(
+              "Erro ao fazer a requisição para api/att/aula2:",
+              responseAula1.statusText
+            );
+          }
+        } catch (error) {
           console.error(
-            "Erro ao fazer a requisição para api/aula02:",
-            response.statusText
+            "Erro ao fazer a requisição para api/att/aula2:",
+            error
           );
         }
-      } catch (error) {
-        console.error("Erro ao fazer a requisição para api/aula02:", error);
+      } else {
+        console.error("Usuário nulo ou em formato não suportado");
       }
     } else {
       toast.error(
-        "Por favor, preencha todos os campos e assista ao vídeo antes de avançar."
+        "Por favor, preencha todos os campos, assista ao vídeo e faça login antes de avançar."
       );
     }
   };
 
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
-    handleRouter();
+    try {
+      const token = localStorage.getItem("@TOKEN");
+      const decodedToken = jwt.decode(token as string) as JwtPayload;
+      const responseUser = await fetch(`/api/List/${decodedToken.id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (responseUser.ok) {
+        const userData = await responseUser.json();
+
+        if (userData.data.aula2) {
+          router.push("/alianca/aula03");
+        } else {
+          handleRouter();
+        }
+      } else {
+        console.error(
+          "Erro ao fazer a requisição para api/List/user.id:",
+          responseUser.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao fazer a requisição para api/List/user.id:", error);
+    }
   };
 
   return (
     <AliancaContainer>
       <header>
         <Image className="logo" src={Logo} alt="logotipo da empresa" />
-        <div>1</div>
+        <div className="next-box">
+          <div className="number">1</div>
+          <div className="number">
+            2
+          </div>
+          <div className="img-locked">
+            <FiLock />
+          </div>
+          <div className="margin"></div>
+        </div>
       </header>
       <div className="container">
         <h1>

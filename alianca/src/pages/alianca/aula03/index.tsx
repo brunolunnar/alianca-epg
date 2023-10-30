@@ -47,43 +47,85 @@ export const AliancaInitial = () => {
       hasToken &&
       videoWatched
     ) {
-      const token = localStorage.getItem("@TOKEN");
+      if (user && typeof user !== "string" && user.id) {
+        try {
+          const responseAula1 = await fetch(`/api/att/aula3/${user.id}`, {
+            method: "PATCH",
+          });
 
-      try {
-        const response = await fetch("/api/aula03", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(feedback),
-        });
+          if (responseAula1.ok) {
+            const token = localStorage.getItem("@TOKEN");
+            const responseAula2 = await fetch("/api/aula03", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(feedback),
+            });
 
-        if (response.ok) {
-          const data = await response.json();
-          toast.success("Parabéns pelo avanço! ");
-          setTimeout(() => {
-            router.push("/congratulations");
-          }, 2000);
-        } else {
+            if (responseAula2.ok) {
+              toast.success("Parabéns pelo avanço!");
+              setTimeout(() => {
+                router.push("/congratulations");
+              }, 2000);
+            } else {
+              console.error(
+                "Erro ao fazer a requisição para api/aula03:",
+                responseAula2.statusText
+              );
+            }
+          } else {
+            console.error(
+              "Erro ao fazer a requisição para api/att/aula3:",
+              responseAula1.statusText
+            );
+          }
+        } catch (error) {
           console.error(
-            "Erro ao fazer a requisição para api/aula03:",
-            response.statusText
+            "Erro ao fazer a requisição para api/att/aula3:",
+            error
           );
         }
-      } catch (error) {
-        console.error("Erro ao fazer a requisição para api/aula03:", error);
+      } else {
+        console.error("Usuário nulo ou em formato não suportado");
       }
     } else {
       toast.error(
-        "Por favor, preencha todos os campos e assista ao vídeo antes de avançar."
+        "Por favor, preencha todos os campos, assista ao vídeo e faça login antes de avançar."
       );
     }
   };
 
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
-    handleRouter();
+    try {
+      const token = localStorage.getItem("@TOKEN");
+      const decodedToken = jwt.decode(token as string) as JwtPayload;
+      const responseUser = await fetch(`/api/List/${decodedToken.id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (responseUser.ok) {
+        const userData = await responseUser.json();
+
+        if (userData.data.aula3) {
+          router.push("/congratulations");
+        } else {
+          handleRouter();
+        }
+      } else {
+        console.error(
+          "Erro ao fazer a requisição para api/List/user.id:",
+          responseUser.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao fazer a requisição para api/List/user.id:", error);
+    }
   };
 
   return (

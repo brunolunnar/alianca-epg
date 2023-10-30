@@ -44,6 +44,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
    
       const isAdmin = user.isAdmin || false;
 
+
       if (process.env.SECRET_KEY) {
         const token = jwt.sign(
           {

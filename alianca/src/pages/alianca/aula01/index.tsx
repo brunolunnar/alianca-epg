@@ -47,17 +47,15 @@ export const AliancaInitial = () => {
       hasToken &&
       videoWatched
     ) {
-      if (user && typeof user !== "string" && user.id) { 
+      if (user && typeof user !== "string" && user.id) {
         try {
-          // Faça a fetch para atualizar a aula 1 aqui
           const responseAula1 = await fetch(`/api/att/aula1/${user.id}`, {
             method: "PATCH",
           });
-  
+
           if (responseAula1.ok) {
-            // Continue com o código para a próxima aula, se necessário
             const token = localStorage.getItem("@TOKEN");
-            const responseAula2 = await fetch("/api/aula02", {
+            const responseAula2 = await fetch("/api/aula01", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -65,7 +63,7 @@ export const AliancaInitial = () => {
               },
               body: JSON.stringify(feedback),
             });
-  
+
             if (responseAula2.ok) {
               toast.success("Parabéns pelo avanço!");
               setTimeout(() => {
@@ -73,7 +71,7 @@ export const AliancaInitial = () => {
               }, 2000);
             } else {
               console.error(
-                "Erro ao fazer a requisição para api/aula02:",
+                "Erro ao fazer a requisição para api/aula01:",
                 responseAula2.statusText
               );
             }
@@ -84,7 +82,10 @@ export const AliancaInitial = () => {
             );
           }
         } catch (error) {
-          console.error("Erro ao fazer a requisição para api/att/aula1:", error);
+          console.error(
+            "Erro ao fazer a requisição para api/att/aula1:",
+            error
+          );
         }
       } else {
         console.error("Usuário nulo ou em formato não suportado");
@@ -95,11 +96,36 @@ export const AliancaInitial = () => {
       );
     }
   };
-  
 
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
-    handleRouter();
+    try {
+      const token = localStorage.getItem("@TOKEN");
+      const decodedToken = jwt.decode(token as string) as JwtPayload;
+      const responseUser = await fetch(`/api/List/${decodedToken.id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (responseUser.ok) {
+        const userData = await responseUser.json();
+
+        if (userData.data.aula1) {
+          router.push("/alianca/aula02");
+        } else {
+          handleRouter();
+        }
+      } else {
+        console.error(
+          "Erro ao fazer a requisição para api/List/user.id:",
+          responseUser.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao fazer a requisição para api/List/user.id:", error);
+    }
   };
 
   return (
