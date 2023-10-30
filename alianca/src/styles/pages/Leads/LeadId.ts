@@ -18,6 +18,22 @@ export const LeadIdContainer = styled('main',{
         width: "200px",
         height: "auto",
       },
+      '.questions-box':{
+        display:'flex',
+        flexDirection:'column',
+        gap:'1rem',
+      },
+      '.title-question':{
+          marginTop:'2rem',
+          fontSize:'2rem',
+      },
+      span:{
+        fontSize:'1.5rem',
+        fontWeight:'600'
+      },
+      p:{
+        lineHeight:'2rem'
+      },
     "@media(min-width:1024px)": {
         ".logo": {
             width: "350px",

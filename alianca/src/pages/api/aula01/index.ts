@@ -37,16 +37,18 @@ if (!process.env.SECRET_KEY) {
 
           const response = await faunaClient.query<any>(
             query.Create(query.Collection("aula1"), {
+              coll:'aula1',
               data: {
                 emailDoUser,
                 ...data,
+                coll:"aula1"
               },
             })
           );
 
           res.status(201).json({
             Aula01: {
-              ref:"Aula-01",
+              coll:"aula1",
               emailDoUser,
               id: response.ref.id,
               ...data,

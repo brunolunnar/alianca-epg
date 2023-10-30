@@ -12,7 +12,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "GET") {
     try {
       const response = await faunaClient.query<{
-        data: any; // Substitua 'IAula1Response' pelo seu tipo de dados real
+        data: any; 
       }>(
         query.Map(
           query.Paginate(query.Documents(query.Collection("aula1"))),

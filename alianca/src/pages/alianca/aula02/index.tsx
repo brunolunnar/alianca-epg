@@ -5,8 +5,11 @@ import Logo from "@/assets/img/logo.png";
 import Image from "next/image";
 import { AliancaContainer } from "@/styles/pages/Alianca";
 import ReactPlayer from "react-player";
+import dynamic from "next/dynamic";
+
 
 globalStyle();
+
 
 export const AliancaInitial = () => {
   const [userName, setUserName] = useState("");
@@ -18,7 +21,7 @@ export const AliancaInitial = () => {
   const [hasToken, setHasToken] = useState(false);
   const [videoWatched, setVideoWatched] = useState(false);
   const videoRef = useRef(null);
-
+  const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
   useEffect(() => {
     const token = localStorage.getItem("@TOKEN");
 
@@ -39,7 +42,7 @@ export const AliancaInitial = () => {
       const token = localStorage.getItem("@TOKEN");
 
       try {
-        const response = await fetch("/api/aula01", {
+        const response = await fetch("/api/aula02", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -51,15 +54,15 @@ export const AliancaInitial = () => {
         if (response.ok) {
           const data = await response.json();
           console.log(data);
-          router.push("alianca/InProcess"); // Redireciona para a próxima página
+          router.push("alianca/Final"); // Redireciona para a próxima página
         } else {
           console.error(
-            "Erro ao fazer a requisição para api/aula01:",
+            "Erro ao fazer a requisição para api/aula02:",
             response.statusText
           );
         }
       } catch (error) {
-        console.error("Erro ao fazer a requisição para api/aula01:", error);
+        console.error("Erro ao fazer a requisição para api/aula02:", error);
       }
     } else {
       alert(
@@ -92,7 +95,7 @@ export const AliancaInitial = () => {
         <div className="video-box">
           {typeof window !== "undefined" && (
             <ReactPlayer
-              playing
+             
               controls={true}
               onEnded={handleVideoEnd}
               ref={videoRef}

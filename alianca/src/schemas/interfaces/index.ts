@@ -11,6 +11,7 @@ interface IRegisterData {
     segmento: string;
     colaboradores: string;
     faturamento: string;
+    isAdmin:boolean;
   }
   interface ILeadResponse {
     ref: {

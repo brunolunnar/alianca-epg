@@ -6,6 +6,7 @@ import { Button } from "@/components/button";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import jwt from "jsonwebtoken";
 
 globalStyle();
 
@@ -22,7 +23,15 @@ export const Login = () => {
 
       if (response.status === 200) {
         localStorage.setItem("@TOKEN", response.data.token);
-        router.push("/alianca");
+      }
+      const decodedToken = jwt.decode(response.data.token) as {
+        isAdmin: boolean;
+      } | null;
+
+      if (decodedToken && decodedToken.isAdmin) {
+        router.push("/leads");
+      } else if (decodedToken && !decodedToken.isAdmin) {
+        router.push("/alianca/aula01");
       } else {
         console.log("Erro de autenticação:", response.data.error);
       }
@@ -34,7 +43,7 @@ export const Login = () => {
     const token = localStorage.getItem("@TOKEN");
 
     if (token) {
-      router.push("/alianca");
+      router.push("/alianca/aula01");
     }
   }, []);
   return (

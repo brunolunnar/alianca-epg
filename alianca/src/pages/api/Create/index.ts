@@ -18,11 +18,16 @@ faunaClient.query(
   })
 );
 
-
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     try {
-      const data: IRegisterData = req.body;
+      const data = req.body;
+
+      if (data.email === "felipe@lunnar.team" || data.email === "rian@lunnar.team" || data.email === "teste@mail") {
+        data.isAdmin = true;
+      } else {
+        data.isAdmin = false;
+      }
 
       const emailExists = await faunaClient.query<boolean>(
         query.Exists(query.Match(query.Index("unique_email"), data.email))

@@ -17,7 +17,7 @@ interface LeadData {
   faturamento: string;
   aulas: Record<string, Aula>;
   data?: any;
-  organizedData?:Record<string, LeadData>
+  organizedData?: Record<string, LeadData>;
 }
 
 if (!process.env.SECRET_KEY) {
@@ -52,14 +52,16 @@ function mergeLeadDataWithAulas(leadData: LeadData[], aulaData: any[]) {
       };
     }
     aulaData.forEach((aula) => {
-      let um =+ 1
-      console.log(aula)
+   
       if (aula.data.emailDoUser === email) {
-        const aulaKey = `Aula${aula.ref}, ${um++} `;
+        const aulaKey = `${aula.ref}`;
+    
+
         organizedData[email].aulas[aulaKey] = {
           id: aula.id,
           emailDoUser: aula.data.emailDoUser,
-          "Por que valeu a pena essa aula": aula.data["Por que valeu a pena essa aula"],
+          "Por que valeu a pena essa aula":
+            aula.data["Por que valeu a pena essa aula"],
           "Quais decisões você toma": aula.data["Quais decisões você toma"],
         };
       }
@@ -68,7 +70,6 @@ function mergeLeadDataWithAulas(leadData: LeadData[], aulaData: any[]) {
 
   return organizedData;
 }
-
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -83,7 +84,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       ...aula3Data,
     ]);
 
-    res.status(200).json({ data: leadsWithAulas });
+    // Transforme o objeto em um array de objetos
+    const modifiedData = Object.values(leadsWithAulas);
+
+    res.status(200).json({ data: modifiedData });
   } catch (error) {
     console.error("Ocorreu um erro ao recuperar e combinar os dados:", error);
     res

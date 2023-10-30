@@ -10,22 +10,30 @@ const faunaClient = new Client({
   secret: process.env.SECRET_KEY,
 });
 
+async function getUserByEmail(email:string) {
+  // Consulte o FaunaDB para buscar o usuário com base no email
+  const result = await faunaClient.query<any>(
+    query.Get(query.Match(query.Index("unique_email"), email))
+  );
+  return result.data;
+}
+
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     try {
       const { email, name } = req.body;
 
-      const emailExists = await faunaClient.query<boolean>(
-        query.Exists(query.Match(query.Index("unique_email"), email))
-      );
-
-      if (!emailExists) {
+      const user = await getUserByEmail(email);
+      console.log(user)
+      if (!user) {
         res.status(400).json({ error: "Email não cadastrado" });
         return;
       }
 
+      const isAdmin = user.isAdmin || false;
+
       if (process.env.SECRET_KEY) {
-        const token = jwt.sign({ email, name }, process.env.SECRET_KEY, {
+        const token = jwt.sign({ email, name, isAdmin }, process.env.SECRET_KEY, {
           expiresIn: "8h",
         });
 

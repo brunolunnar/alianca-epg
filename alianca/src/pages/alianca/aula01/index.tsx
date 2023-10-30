@@ -5,8 +5,11 @@ import Logo from "@/assets/img/logo.png";
 import Image from "next/image";
 import { AliancaContainer } from "@/styles/pages/Alianca";
 import ReactPlayer from "react-player";
+import dynamic from "next/dynamic";
+
 
 globalStyle();
+
 
 export const AliancaInitial = () => {
   const [userName, setUserName] = useState("");
@@ -18,7 +21,7 @@ export const AliancaInitial = () => {
   const [hasToken, setHasToken] = useState(false);
   const [videoWatched, setVideoWatched] = useState(false);
   const videoRef = useRef(null);
-
+  const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
   useEffect(() => {
     const token = localStorage.getItem("@TOKEN");
 
@@ -50,7 +53,7 @@ export const AliancaInitial = () => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
+  
           router.push("alianca/Final"); // Redireciona para a próxima página
         } else {
           console.error(
@@ -70,7 +73,7 @@ export const AliancaInitial = () => {
 
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
-    handleRouter(); // Execute o código para enviar os dados do formulário e avançar para a próxima página
+    handleRouter(); 
   };
 
   const handleVideoEnd = () => {
@@ -92,7 +95,7 @@ export const AliancaInitial = () => {
         <div className="video-box">
           {typeof window !== "undefined" && (
             <ReactPlayer
-              playing
+             
               controls={true}
               onEnded={handleVideoEnd}
               ref={videoRef}

@@ -1,6 +1,6 @@
 import { globalStyle } from "@/styles/global";
 import Logo from "@/assets/img/logo.png";
-import Image from 'next/image';
+import Image from "next/image";
 import { LeadIdContainer } from "@/styles/pages/Leads/LeadId";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -8,30 +8,37 @@ import { useEffect, useState } from "react";
 globalStyle();
 
 interface Lead {
+  aulas: Record<string, any>; // Defina o tipo de aulas como um objeto com chaves dinâmicas
   id: string;
   name: string;
   email: string;
   whatsapp: string;
   segmento: string;
-  colaboradores: number;
+  colaboradores: string; // Alterei para string
   faturamento: string;
 }
 
 export const LeadsId = () => {
   const router = useRouter();
-  const { id } = router.query;
+  const email = router.query;
+  const id = email.id;
+  console.log(email.id);
   const [lead, setLead] = useState<Lead | null>(null);
 
   useEffect(() => {
     if (id) {
-      fetch(`/api/List/${id}`)
+      console.log("Valor de email:", id);
+      fetch(`/api/getAll/${id}`)
         .then((response) => response.json())
-        .then((data: { data: Lead }) => {
+        .then((data) => {
+          console.log("Resposta da API:", data);
           setLead(data.data);
         })
-        .catch((error) => console.error("Erro ao buscar os detalhes do lead:", error));
+        .catch((error) =>
+          console.error("Erro ao buscar os detalhes do lead:", error)
+        );
     }
-  }, [id]);
+  }, [email]);
 
   if (!lead) {
     return <p>Carregando...</p>;
@@ -45,10 +52,19 @@ export const LeadsId = () => {
         <p>Email: {lead.email}</p>
         <p>Whatsapp: {lead.whatsapp}</p>
         <p>Segmento: {lead.segmento}</p>
-        <p>Colaboradores : {lead.colaboradores}</p>
-        <p>Faturamento : {lead.faturamento}</p>
+        <p>Colaboradores: {lead.colaboradores}</p>
+        <p>Faturamento: {lead.faturamento}</p>
         <div>
-            perguntas e respostas
+          <h2>perguntas e respostas</h2>
+          {Object.keys(lead.aulas).map((aulaKey, um) => (
+            <div className="questions-box" key={aulaKey}>
+              <h3 className="title-question">Aula 0{um + 1}</h3>
+              <span>Por que valeu a pena essa aula:</span>
+              <p>{lead.aulas[aulaKey]["Por que valeu a pena essa aula"]}</p>
+              <span>Quais decisões você toma:</span>
+              <p>{lead.aulas[aulaKey]["Quais decisões você toma"]}</p>
+            </div>
+          ))}
         </div>
       </section>
     </LeadIdContainer>

@@ -22,9 +22,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       const token = authHeader.split("Bearer ")[1];
-if (!process.env.SECRET_KEY) {
-  throw new Error("A variável de ambiente SECRET_KEY não está definida.");
-}
+      if (!process.env.SECRET_KEY) {
+        throw new Error("A variável de ambiente SECRET_KEY não está definida.");
+      }
       if (token) {
         try {
           const decoded = jwt.verify(
@@ -40,16 +40,17 @@ if (!process.env.SECRET_KEY) {
               data: {
                 emailDoUser,
                 ...data,
+                ref:"aula-02"
               },
             })
           );
 
           res.status(201).json({
-            Aula01: {
-              ref:"Aula-01",
+            Aula02: {
               emailDoUser,
               id: response.ref.id,
               ...data,
+              ref:"aula-02"
             },
           });
         } catch (error) {
