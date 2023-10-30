@@ -10,32 +10,55 @@ const faunaClient = new Client({
   secret: process.env.SECRET_KEY,
 });
 
-async function getUserByEmail(email:string) {
-  // Consulte o FaunaDB para buscar o usuário com base no email
-  const result = await faunaClient.query<any>(
-    query.Get(query.Match(query.Index("unique_email"), email))
-  );
-  return result.data;
+async function getUserByEmail(email: string) {
+  try {
+    const result = await faunaClient.query<any>(
+      query.Get(query.Match(query.Index("unique_email"), email))
+    );
+    
+
+    const id = result.ref.id;
+
+    return {
+      id,
+      ...result.data,
+    };
+  } catch (error) {
+    console.error("Erro ao obter usuário por email:", error);
+    return null; 
+  }
 }
+
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     try {
-      const { email, name } = req.body;
+      const { email } = req.body;
 
       const user = await getUserByEmail(email);
-      console.log(user)
+     
       if (!user) {
         res.status(400).json({ error: "Email não cadastrado" });
         return;
       }
-
+   
       const isAdmin = user.isAdmin || false;
 
       if (process.env.SECRET_KEY) {
-        const token = jwt.sign({ email, name, isAdmin }, process.env.SECRET_KEY, {
-          expiresIn: "8h",
-        });
+        const token = jwt.sign(
+          {
+            id: user.id,
+            email,
+            name: user.name,
+            isAdmin,
+  
+          },
+          process.env.SECRET_KEY,
+          {
+            expiresIn: "8h",
+          }
+        );
+      
 
         res.status(200).json({ token });
       } else {

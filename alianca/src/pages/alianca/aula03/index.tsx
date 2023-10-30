@@ -1,15 +1,21 @@
 import { useEffect, useState, useRef } from "react";
+import { globalStyle } from "@/styles/global";
 import { useRouter } from "next/router";
 import Logo from "@/assets/img/logo.png";
 import Image from "next/image";
 import { AliancaContainer } from "@/styles/pages/Alianca";
-
+import dynamic from "next/dynamic";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { globalStyle } from "@/styles/global";
+import { FiLock } from "react-icons/fi";
+
 globalStyle();
+
+const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
+
 export const AliancaInitial = () => {
-  const [userName, setUserName] = useState("");
+  const [user, setUser] = useState<string | JwtPayload | null>("");
   const router = useRouter();
   const [feedback, setFeedback] = useState({
     "Por que valeu a pena essa aula": "",
@@ -19,9 +25,14 @@ export const AliancaInitial = () => {
   const [videoWatched, setVideoWatched] = useState(false);
   const videoRef = useRef(null);
 
+  const handleVideoEnd = () => {
+    setVideoWatched(true);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("@TOKEN");
-
+    const decodedToken = jwt.decode(token as string) as JwtPayload;
+    setUser(decodedToken);
     if (token) {
       setHasToken(true);
     } else {
@@ -31,14 +42,12 @@ export const AliancaInitial = () => {
 
   const handleRouter = async () => {
     if (
-      videoWatched &&
       feedback["Por que valeu a pena essa aula"] &&
       feedback["Quais decisões você toma"] &&
-      hasToken
+      hasToken &&
+      videoWatched
     ) {
       const token = localStorage.getItem("@TOKEN");
-
-      toast.success("Pronto para avançar para a próxima aula!");
 
       try {
         const response = await fetch("/api/aula03", {
@@ -52,76 +61,64 @@ export const AliancaInitial = () => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
-          router.push("alianca/InProcess");
+          toast.success("Parabéns pelo avanço! ");
+          setTimeout(() => {
+            router.push("/congratulations");
+          }, 2000);
         } else {
-          toast.error(
-            `Erro ao fazer a requisição para api/aula03: ${response.statusText}`
+          console.error(
+            "Erro ao fazer a requisição para api/aula03:",
+            response.statusText
           );
         }
       } catch (error) {
-        toast.error(`Erro ao fazer a requisição para api/aula03: ${error}`);
+        console.error("Erro ao fazer a requisição para api/aula03:", error);
       }
     } else {
-      if (!videoWatched) {
-        toast.error(
-          "Vídeo não foi assistido completamente. Por favor, assista o vídeo completamente antes de avançar."
-        );
-      }
-      if (
-        !feedback["Por que valeu a pena essa aula"] ||
-        !feedback["Quais decisões você toma"]
-      ) {
-        toast.error("Por favor, preencha todas as perguntas antes de avançar.");
-      }
+      toast.error(
+        "Por favor, preencha todos os campos e assista ao vídeo antes de avançar."
+      );
     }
   };
 
   const handleFormSubmit = async (e: any) => {
-    // e.preventDefault();
-
-    if (!videoWatched) {
-      toast.error(
-        "Vídeo não foi assistido completamente. Por favor, assista o vídeo completamente antes de avançar."
-      );
-      return;
-    }
-
-    if (
-      !feedback["Por que valeu a pena essa aula"] ||
-      !feedback["Quais decisões você toma"]
-    ) {
-      toast.error("Por favor, preencha todas as perguntas antes de avançar.");
-      return;
-    }
-    console.log("oioioi alguem?");
+    e.preventDefault();
     handleRouter();
-  };
-
-  const handleVideoEnd = () => {
-    setVideoWatched(true);
   };
 
   return (
     <AliancaContainer>
       <header>
         <Image className="logo" src={Logo} alt="logotipo da empresa" />
-        <div>1</div>
+        <div className="next-box">
+          <div className="number">1</div>
+          <div className="number">
+            2
+          </div>
+          <div className="number">
+        3
+          </div>
+          <div className="margin"></div>
+        </div>
       </header>
       <div className="container">
-        <h1>Olá, {userName}</h1>
+        <h1>
+          Olá, {user ? (typeof user === "string" ? user : user.name) : ""}
+        </h1>
         <h3>
           Muito bom ver você aqui buscando se desenvolver e crescer como
           empresário.
         </h3>
         <div className="video-box">
-          <iframe
-            onEnded={handleVideoEnd}
-            ref={videoRef}
-            width="100%"
-            src="https://www.youtube.com/embed/vkDMs4BcbNU?si=uSQkfYzejp9iYe-9"
-            suppressHydrationWarning
-          ></iframe>
+          {typeof window !== "undefined" && (
+            <ReactPlayer
+              controls={true}
+              onEnded={handleVideoEnd}
+              ref={videoRef}
+              width="100%"
+              url="https://www.youtube.com/watch?v=vkDMs4BcbNU"
+            />
+          )}
           <form onSubmit={handleFormSubmit}>
             <label htmlFor="feedback">Por que valeu a pena essa aula?</label>
             <textarea
@@ -148,60 +145,20 @@ export const AliancaInitial = () => {
               }
             ></textarea>
             <div className="button-box">
-              <button
-                type="submit"
-                onClick={async (e) => {
-                  e.preventDefault();
-
-                  if (!videoWatched) {
-                    toast.error(
-                      "Vídeo não foi assistido completamente. Por favor, assista o vídeo completamente antes de avançar."
-                    );
-                  } else if (
-                    !feedback["Por que valeu a pena essa aula"] ||
-                    !feedback["Quais decisões você toma"]
-                  ) {
-                    toast.error(
-                      "Por favor, preencha todas as perguntas antes de avançar."
-                    );
-                  } else {
-                    // Todas as condições atendidas, então avance para a próxima aula
-                    const token = localStorage.getItem("@TOKEN");
-
-                    try {
-                      const response = await fetch("/api/aula03", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                          Authorization: `Bearer ${token}`,
-                        },
-                        body: JSON.stringify(feedback),
-                      });
-
-                      if (response.ok) {
-                        const data = await response.json();
-                        console.log(data);
-                        router.push("alianca/InProcess");
-                      } else {
-                        toast.error(
-                          `Erro ao fazer a requisição para api/aula03: ${response.statusText}`
-                        );
-                      }
-                    } catch (error) {
-                      toast.error(
-                        `Erro ao fazer a requisição para api/aula03: ${error}`
-                      );
-                    }
-                  }
-                }}
-              >
-                Liberar próxima aula!
-              </button>
+              <button type="submit">Liberar próxima aula!</button>
             </div>
           </form>
         </div>
       </div>
-      <ToastContainer />
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        theme="dark"
+      />
     </AliancaContainer>
   );
 };

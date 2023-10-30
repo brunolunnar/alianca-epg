@@ -1,6 +1,6 @@
-import { Client, query } from "faunadb";
 import { NextApiRequest, NextApiResponse } from "next";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { Client, query } from "faunadb";
+import jwt, { JwtPayload } from "jsonwebtoken"; // Importe JwtPayload
 
 if (!process.env.SECRET_KEY) {
   throw new Error("A variável de ambiente SECRET_KEY não está definida.");
@@ -20,11 +20,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           .status(401)
           .json({ error: "Token de autenticação não fornecido" });
       }
-
+      if (!process.env.SECRET_KEY) {
+        throw new Error("A variável de ambiente SECRET_KEY não está definida.");
+      }
       const token = authHeader.split("Bearer ")[1];
-if (!process.env.SECRET_KEY) {
-  throw new Error("A variável de ambiente SECRET_KEY não está definida.");
-}
+
       if (token) {
         try {
           const decoded = jwt.verify(
@@ -33,22 +33,20 @@ if (!process.env.SECRET_KEY) {
           ) as JwtPayload;
 
           const emailDoUser = decoded.email;
+
           const data = req.body;
 
           const response = await faunaClient.query<any>(
-            query.Create(query.Collection("aula1"), {
-              coll:'aula1',
+            query.Create(query.Collection("leads"), {
               data: {
                 emailDoUser,
                 ...data,
-                coll:"aula1"
               },
             })
           );
 
-          res.status(201).json({
+          res.status(200).json({
             Aula01: {
-              coll:"aula1",
               emailDoUser,
               id: response.ref.id,
               ...data,
@@ -65,7 +63,7 @@ if (!process.env.SECRET_KEY) {
       console.log(error);
       res
         .status(500)
-        .json({ error: "Ocorreu um erro ao cadastrar na coleção aula1." });
+        .json({ error: "Ocorreu um erro ao cadastrar a pergunta." });
     }
   } else {
     res.status(405).json({ error: "Método não permitido" });

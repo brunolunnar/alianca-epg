@@ -34,7 +34,7 @@ export const Leads = () => {
     if (token) {
       try {
         const decodedToken = jwt.decode(token) as DecodedToken;
-        console.log(decodedToken)
+
         if (decodedToken.isAdmin === true) {
           setIsAdmin(true);
         }
@@ -46,7 +46,7 @@ export const Leads = () => {
 
   useEffect(() => {
     if (!isAdmin) {
-      return; // Se o usuário não é um administrador, não renderize o componente
+      return;
     }
 
     fetch("/api/getAll")
@@ -57,7 +57,7 @@ export const Leads = () => {
         setFilteredLeads(leadData);
       })
       .catch((error) => console.error("Erro ao buscar os leads:", error));
-  }, [isAdmin]); // Adicione isAdmin como dependência
+  }, [isAdmin]);
 
   const handleSearch = (searchText: string) => {
     const filtered = leads.filter((lead) =>

@@ -11,6 +11,56 @@ export const AliancaContainer = styled("main", {
   gap: "2rem",
   padding: "30px",
   fontSize: "1.3rem",
+
+
+'.next-box':{
+display:'flex',
+gap:'1rem',
+position:'relative',
+alignItems:'center',
+},
+'.number':{
+  background:'$branch',
+  color:'black',
+  width:'20px',
+  height:'20px',
+  borderRadius:'50%',
+  padding:'10px',
+  display:'flex',
+  justifyContent:'center',
+  alignItems:'center',
+  fontWeight:'900',
+},
+'.margin':{
+  width:'100%',
+  background:'$branch',
+  position:'absolute',
+  top:'50%',
+  left:0,
+  height:'4px',
+  zIndex:'-999',
+  borderRadius:'30px'
+
+},
+'.img-locked':{
+  background:'white',
+  color:'black',
+  width:'15px',
+  height:'15px',
+  borderRadius:'50%',
+  padding:'10px',
+  display:'flex',
+  justifyContent:'center',
+  alignItems:'center',
+  fontWeight:'900',
+
+},
+'.img-locked svg':{
+  color:'$branch'
+},
+
+
+
   h1: {
     fontWeight: "400",
   },
@@ -22,6 +72,8 @@ export const AliancaContainer = styled("main", {
     justifyContent: "space-between",
     // width: "80%",
     alignItems: "center",
+    flexDirection:'column',
+    gap:'1rem'
   },
   ".container": {
     display: "flex",
@@ -66,6 +118,9 @@ export const AliancaContainer = styled("main", {
     flexDirection: "row-reverse",
   },
   "@media(min-width:768px)": {
+    header:{
+      flexDirection:'unset',
+    },
     ".video": {
       height: "300px",
     },

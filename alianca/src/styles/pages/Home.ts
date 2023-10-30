@@ -25,6 +25,7 @@ export const HomeContainer = styled("main", {
     border: "3px solid $branch",
     color: "$white",
     transition: "0.3s",
+  
   },
   ".login-btn:hover": {
     background: "$branch",
@@ -84,10 +85,12 @@ export const HomeContainer = styled("main", {
       marginTop: "2rem",
     },
     ".login-box": {
-      width: "100%",
+      width: "81%",
       display: "flex",
-      flexDirection:'row-reverse'
+      flexDirection:'row-reverse',
+      position:'absolute',
     },
+ 
   
   },
 });

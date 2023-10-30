@@ -84,7 +84,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       ...aula3Data,
     ]);
 
-    // Transforme o objeto em um array de objetos
+
     const modifiedData = Object.values(leadsWithAulas);
 
     res.status(200).json({ data: modifiedData });

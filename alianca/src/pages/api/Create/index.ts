@@ -28,6 +28,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       } else {
         data.isAdmin = false;
       }
+      data.aula1= false
+      data.aula2= false
+      data.aula3= false
+
 
       const emailExists = await faunaClient.query<boolean>(
         query.Exists(query.Match(query.Index("unique_email"), data.email))

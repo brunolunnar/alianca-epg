@@ -4,15 +4,18 @@ import { useRouter } from "next/router";
 import Logo from "@/assets/img/logo.png";
 import Image from "next/image";
 import { AliancaContainer } from "@/styles/pages/Alianca";
-import ReactPlayer from "react-player";
 import dynamic from "next/dynamic";
-
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { FiLock } from "react-icons/fi";
 
 globalStyle();
 
+const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
 export const AliancaInitial = () => {
-  const [userName, setUserName] = useState("");
+  const [user, setUser] = useState<string | JwtPayload | null>("");
   const router = useRouter();
   const [feedback, setFeedback] = useState({
     "Por que valeu a pena essa aula": "",
@@ -21,10 +24,15 @@ export const AliancaInitial = () => {
   const [hasToken, setHasToken] = useState(false);
   const [videoWatched, setVideoWatched] = useState(false);
   const videoRef = useRef(null);
-  const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
+
+  const handleVideoEnd = () => {
+    setVideoWatched(true);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("@TOKEN");
-
+    const decodedToken = jwt.decode(token as string) as JwtPayload;
+    setUser(decodedToken);
     if (token) {
       setHasToken(true);
     } else {
@@ -39,55 +47,80 @@ export const AliancaInitial = () => {
       hasToken &&
       videoWatched
     ) {
-      const token = localStorage.getItem("@TOKEN");
-
-      try {
-        const response = await fetch("/api/aula01", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(feedback),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
+      if (user && typeof user !== "string" && user.id) { 
+        try {
+          // Faça a fetch para atualizar a aula 1 aqui
+          const responseAula1 = await fetch(`/api/att/aula1/${user.id}`, {
+            method: "PATCH",
+          });
   
-          router.push("alianca/Final"); // Redireciona para a próxima página
-        } else {
-          console.error(
-            "Erro ao fazer a requisição para api/aula01:",
-            response.statusText
-          );
+          if (responseAula1.ok) {
+            // Continue com o código para a próxima aula, se necessário
+            const token = localStorage.getItem("@TOKEN");
+            const responseAula2 = await fetch("/api/aula02", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(feedback),
+            });
+  
+            if (responseAula2.ok) {
+              toast.success("Parabéns pelo avanço!");
+              setTimeout(() => {
+                router.push("/alianca/aula02");
+              }, 2000);
+            } else {
+              console.error(
+                "Erro ao fazer a requisição para api/aula02:",
+                responseAula2.statusText
+              );
+            }
+          } else {
+            console.error(
+              "Erro ao fazer a requisição para api/att/aula1:",
+              responseAula1.statusText
+            );
+          }
+        } catch (error) {
+          console.error("Erro ao fazer a requisição para api/att/aula1:", error);
         }
-      } catch (error) {
-        console.error("Erro ao fazer a requisição para api/aula01:", error);
+      } else {
+        console.error("Usuário nulo ou em formato não suportado");
       }
     } else {
-      alert(
-        "Por favor, preencha todos os campos e assista ao vídeo antes de avançar."
+      toast.error(
+        "Por favor, preencha todos os campos, assista ao vídeo e faça login antes de avançar."
       );
     }
   };
+  
 
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
-    handleRouter(); 
-  };
-
-  const handleVideoEnd = () => {
-    setVideoWatched(true);
+    handleRouter();
   };
 
   return (
     <AliancaContainer>
       <header>
         <Image className="logo" src={Logo} alt="logotipo da empresa" />
-        <div>1</div>
+        <div className="next-box">
+          <div className="number">1</div>
+          <div className="img-locked">
+            <FiLock />
+          </div>
+          <div className="img-locked">
+            <FiLock />
+          </div>
+          <div className="margin"></div>
+        </div>
       </header>
       <div className="container">
-        <h1>Olá, {userName}</h1>
+        <h1>
+          Olá, {user ? (typeof user === "string" ? user : user.name) : ""}
+        </h1>
         <h3>
           Muito bom ver você aqui buscando se desenvolver e crescer como
           empresário.
@@ -95,7 +128,6 @@ export const AliancaInitial = () => {
         <div className="video-box">
           {typeof window !== "undefined" && (
             <ReactPlayer
-             
               controls={true}
               onEnded={handleVideoEnd}
               ref={videoRef}
@@ -129,13 +161,20 @@ export const AliancaInitial = () => {
               }
             ></textarea>
             <div className="button-box">
-              <button type="submit" disabled={!videoWatched}>
-                Liberar próxima aula!
-              </button>
+              <button type="submit">Liberar próxima aula!</button>
             </div>
           </form>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        theme="dark"
+      />
     </AliancaContainer>
   );
 };
