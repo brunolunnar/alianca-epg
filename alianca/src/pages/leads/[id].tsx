@@ -22,22 +22,22 @@ export const LeadsId = () => {
   const router = useRouter();
   const email = router.query;
   const id = email.id;
-  console.log(email.id);
+
   const [lead, setLead] = useState<Lead | null>(null);
 
   useEffect(() => {
     if (id) {
-      console.log("Valor de email:", id);
+  
       fetch(`/api/getAll/${id}`)
         .then((response) => response.json())
         .then((data) => {
-          console.log("Resposta da API:", data);
           setLead(data.data);
         })
         .catch((error) =>
           console.error("Erro ao buscar os detalhes do lead:", error)
         );
     }
+        
   }, [email]);
 
   if (!lead) {

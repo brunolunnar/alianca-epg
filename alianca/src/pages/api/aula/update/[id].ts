@@ -10,27 +10,27 @@ const faunaClient = new Client({
 });
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method === "GET") {
+  if (req.method === "PATCH") {
     try {
-      
       const { id } = req.query;
 
-
-
+   
       const response = await faunaClient.query<any>(
-        query.Get(query.Ref(query.Collection("leads"), id))
+        query.Update(query.Ref(query.Collection("aula"), id), {
+          data: {
+            curso: true,
+          },
+        })
       );
 
       const usuario = {
-          
-          id: response.ref.id,
-          ...response.data,
-        };
-        
+        id: response.ref.id,
+        ...response.data,
+      };
+
       res.status(200).json({ data: usuario });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: "Ocorreu um erro ao recuperar o usuário por ID." });
+      res.status(500).json({ error: "Ocorreu um erro ao atualizar o campo 'aula' para true." });
     }
   } else {
     res.status(405).json({ error: "Método não permitido" });

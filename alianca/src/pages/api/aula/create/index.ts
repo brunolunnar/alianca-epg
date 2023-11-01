@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Client, query } from "faunadb";
-import jwt, { JwtPayload } from "jsonwebtoken"; // Importe JwtPayload
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 if (!process.env.SECRET_KEY) {
   throw new Error("A variável de ambiente SECRET_KEY não está definida.");
@@ -20,6 +20,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           .status(401)
           .json({ error: "Token de autenticação não fornecido" });
       }
+
       if (!process.env.SECRET_KEY) {
         throw new Error("A variável de ambiente SECRET_KEY não está definida.");
       }
@@ -32,22 +33,31 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             process.env.SECRET_KEY
           ) as JwtPayload;
 
-          const emailDoUser = decoded.email;
+          const email = decoded.email;
 
           const data = req.body;
 
-          const response = await faunaClient.query<IQuestion01>(
-            query.Create(query.Collection("aula1"), {
+          const response = await faunaClient.query<any>(
+            query.Create(query.Collection("aula"), {
               data: {
-                emailDoUser,
+                email,
                 ...data,
+              },
+            })
+          );
+
+          await faunaClient.query(
+            query.Create(query.Collection("leads"), {
+              data: {
+                campoAula: response.data.campoAula,
+                // Adicione outros campos da coleção "leads" conforme necessário
               },
             })
           );
 
           res.status(200).json({
             Aula01: {
-              emailDoUser,
+              email,
               id: response.ref.id,
               ...data,
             },

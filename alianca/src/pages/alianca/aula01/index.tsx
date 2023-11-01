@@ -1,132 +1,97 @@
-import { useEffect, useState, useRef } from "react";
-import { globalStyle } from "@/styles/global";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { AliancaContainer } from "@/styles/pages/Alianca";
+import { FiLock } from "react-icons/fi";
+import { ToastContainer, toast } from "react-toastify";
 import Logo from "@/assets/img/logo.png";
 import Image from "next/image";
-import { AliancaContainer } from "@/styles/pages/Alianca";
-import dynamic from "next/dynamic";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { FiLock } from "react-icons/fi";
-
-globalStyle();
-
+import dynamic from "next/dynamic";
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
-export const AliancaInitial = () => {
-  const [user, setUser] = useState<string | JwtPayload | null>("");
-  const router = useRouter();
-  const [feedback, setFeedback] = useState({
-    "Por que valeu a pena essa aula": "",
-    "Quais decisões você toma": "",
-  });
-  const [hasToken, setHasToken] = useState(false);
-  const [videoWatched, setVideoWatched] = useState(false);
-  const videoRef = useRef(null);
+interface AulaData {
+  title: string;
+  video: string;
+  "pergunta 01": string;
+  "pergunta 02": string;
+}
 
-  const handleVideoEnd = () => {
-    setVideoWatched(true);
-  };
+export const CursoID = () => {
+  const [aula, setAula] = useState<AulaData | null>(null);
+  const [formData, setFormData] = useState<{
+    [key: string]: string;
+  }>({});
+  const router = useRouter();
+  const { id } = router.query;
+  
 
   useEffect(() => {
-    const token = localStorage.getItem("@TOKEN");
-    const decodedToken = jwt.decode(token as string) as JwtPayload;
-    setUser(decodedToken);
-    if (token) {
-      setHasToken(true);
-    } else {
-      setHasToken(false);
-    }
-  }, []);
-
-  const handleRouter = async () => {
-    if (
-      feedback["Por que valeu a pena essa aula"] &&
-      feedback["Quais decisões você toma"] &&
-      hasToken &&
-      videoWatched
-    ) {
-      if (user && typeof user !== "string" && user.id) {
-        try {
-          const responseAula1 = await fetch(`/api/att/aula1/${user.id}`, {
-            method: "PATCH",
+    if (id) {
+      fetch(`/api/curso/list/${id as string}`)
+        .then((response) => response.json())
+        .then((data: { data: AulaData }) => {
+          setAula(data.data);
+          setFormData({
+            [data.data["pergunta 01"]]: "",
+            [data.data["pergunta 02"]]: "",
           });
-
-          if (responseAula1.ok) {
-            const token = localStorage.getItem("@TOKEN");
-            const responseAula2 = await fetch("/api/aula01", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify(feedback),
-            });
-
-            if (responseAula2.ok) {
-              toast.success("Parabéns pelo avanço!");
-              setTimeout(() => {
-                router.push("/alianca/aula02");
-              }, 2000);
-            } else {
-              console.error(
-                "Erro ao fazer a requisição para api/aula01:",
-                responseAula2.statusText
-              );
-            }
-          } else {
-            console.error(
-              "Erro ao fazer a requisição para api/att/aula1:",
-              responseAula1.statusText
-            );
-          }
-        } catch (error) {
-          console.error(
-            "Erro ao fazer a requisição para api/att/aula1:",
-            error
-          );
-        }
-      } else {
-        console.error("Usuário nulo ou em formato não suportado");
-      }
-    } else {
-      toast.error(
-        "Por favor, preencha todos os campos, assista ao vídeo e faça login antes de avançar."
-      );
-    }
-  };
-
-  const handleFormSubmit = async (e: any) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("@TOKEN");
-      const decodedToken = jwt.decode(token as string) as JwtPayload;
-      const responseUser = await fetch(`/api/List/${decodedToken.id}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (responseUser.ok) {
-        const userData = await responseUser.json();
-
-        if (userData.data.aula1) {
-          router.push("/alianca/aula02");
-        } else {
-          handleRouter();
-        }
-      } else {
-        console.error(
-          "Erro ao fazer a requisição para api/List/user.id:",
-          responseUser.statusText
+        })
+        .catch((error) =>
+          console.error("Erro ao buscar detalhes do curso", error)
         );
-      }
-    } catch (error) {
-      console.error("Erro ao fazer a requisição para api/List/user.id:", error);
     }
+  }, [id]);
+
+  const handleFormSubmit = () => {
+    const token = localStorage.getItem("@TOKEN");
+
+    if (!token || !aula) {
+      return;
+    }
+
+    if (
+      (!formData[aula["pergunta 01"]] || !formData[aula["pergunta 02"]])
+    ) {
+      toast.error("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    const requestBody = {
+      [aula["pergunta 01"]]: formData[aula["pergunta 01"]],
+      [aula["pergunta 02"]]: formData[aula["pergunta 02"]],
+    };
+
+    fetch("/api/aula/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestBody),
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Erro ao criar aula");
+        }
+      })
+      .then((data: { data: AulaData }) => {
+        setAula(data.data);
+
+        toast.success("Aula criada com sucesso!");
+      
+      })
+      .catch((error) => {
+        console.error("Erro ao criar aula", error);
+
+        toast.error("Erro ao criar aula");
+      });
   };
+
+  if (!aula) {
+    return <h1>Carregando...</h1>;
+  }
 
   return (
     <AliancaContainer>
@@ -144,47 +109,44 @@ export const AliancaInitial = () => {
         </div>
       </header>
       <div className="container">
-        <h1>
-          Olá, {user ? (typeof user === "string" ? user : user.name) : ""}
-        </h1>
+        <h1>Olá, usuário</h1>
         <h3>
           Muito bom ver você aqui buscando se desenvolver e crescer como
           empresário.
         </h3>
         <div className="video-box">
           {typeof window !== "undefined" && (
-            <ReactPlayer
-              controls={true}
-              onEnded={handleVideoEnd}
-              ref={videoRef}
-              width="100%"
-              url="https://www.youtube.com/watch?v=vkDMs4BcbNU"
-            />
+            <ReactPlayer controls={true} width="100%" url={aula.video} />
           )}
-          <form onSubmit={handleFormSubmit}>
-            <label htmlFor="feedback">Por que valeu a pena essa aula?</label>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleFormSubmit();
+            }}
+          >
+            <label htmlFor={aula["pergunta 01"]}>{aula["pergunta 01"]}</label>
             <textarea
-              name="feedback"
-              id="feedback"
-              value={feedback["Por que valeu a pena essa aula"]}
+              name={aula["pergunta 01"]}
+              value={formData[aula["pergunta 01"]] || ""}
               onChange={(e) =>
-                setFeedback({
-                  ...feedback,
-                  "Por que valeu a pena essa aula": e.target.value,
+                setFormData({
+                  ...formData,
+                  [aula["pergunta 01"]]: e.target.value,
                 })
               }
+         
             ></textarea>
-            <label htmlFor="decisao">Quais decisões você toma?</label>
+            <label htmlFor={aula["pergunta 02"]}>{aula["pergunta 02"]}</label>
             <textarea
-              name="decisao"
-              id="decisao"
-              value={feedback["Quais decisões você toma"]}
+              name={aula["pergunta 02"]}
+              value={formData[aula["pergunta 02"]] || ""}
               onChange={(e) =>
-                setFeedback({
-                  ...feedback,
-                  "Quais decisões você toma": e.target.value,
+                setFormData({
+                  ...formData,
+                  [aula["pergunta 02"]]: e.target.value,
                 })
               }
+              
             ></textarea>
             <div className="button-box">
               <button type="submit">Liberar próxima aula!</button>
@@ -205,4 +167,4 @@ export const AliancaInitial = () => {
   );
 };
 
-export default AliancaInitial;
+export default CursoID;

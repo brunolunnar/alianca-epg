@@ -30,3 +30,16 @@ interface ILeadResponse {
     faturamento: string;
   };
 }
+interface IQuestion01{
+  ref: any;
+  "Por que valeu a pena essa aula": string;
+  "Quais decisões você toma": string;
+}
+interface IQuestion02{
+  "Por que valeu a pena essa aula": string;
+  "Quais decisões você toma": string;
+}
+interface IQuestion03{
+  "Por que valeu a pena essa aula": string;
+  "Quais decisões você toma": string;
+}
