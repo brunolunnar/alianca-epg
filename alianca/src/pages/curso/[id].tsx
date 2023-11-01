@@ -8,8 +8,8 @@ import Image from "next/image";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import dynamic from "next/dynamic";
 import "react-toastify/dist/ReactToastify.css";
-import { theme } from "@/styles";
 const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
+
 
 interface AulaData {
   id: string;
@@ -41,7 +41,6 @@ export const CursoID = () => {
   const router = useRouter();
   const { id } = router.query;
 
-
   //efect para capturar token
   useEffect(() => {
     const token = localStorage.getItem("@TOKEN");
@@ -53,7 +52,6 @@ export const CursoID = () => {
       setHasToken(false);
     }
   }, []);
-
 
   //efect para pegar informações do curso(aulas)
   useEffect(() => {
@@ -85,107 +83,108 @@ export const CursoID = () => {
     fetch(`/api/aula/list/${decodecToken.email}`)
       .then((response) => response.json())
       .then((data) => setIdAula(data.data))
-    
+
       .catch((error) =>
         console.error(
           "Erro ao buscar a api de listar pelo email as aulas",
           error
         )
       );
-   
   }, []);
 
   const handleRouter = async () => {
-    if (formData && hasToken && videoWatched) {
-      if (user && typeof user !== "string" && user.id) {
-        try {
-          const responseAula = await fetch(`/api/aula/update/${id}`, {
-            method: "PATCH",
-          });
+    if (!(hasToken && formData && videoWatched)) {
+      toast.error(
+        "Por favor, assista ao vídeo e preencha todos os campos obrigatórios."
+      );
+      return;
+    }
 
-          if (responseAula.ok) {
-            const token = localStorage.getItem("@TOKEN");
-            const responseAulaPost = await fetch("api/aula/create/", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify(formData),
-            });
-            if (responseAulaPost.ok) {
-              toast.success("Parabéns pelo avanço!");
-              setTimeout(() => {
-                router.push("/curso");
-              }, 2000);
-            } else {
-              console.error(
-                "Erro ao fazer requisição da api aula",
-                responseAulaPost.statusText
-              );
-            }
+    if (user && typeof user !== "string" && user.id) {
+      try {
+        const token = localStorage.getItem("@TOKEN");
+        const decodedToken = jwt.decode(token as string) as JwtPayload;
+
+        const responseAula = await fetch(
+          `/api/relations/update/${decodedToken.id}/${id}`,
+          {
+            method: "PATCH",
+          }
+        );
+
+        if (responseAula.ok) {
+          const token = localStorage.getItem("@TOKEN");
+          const responseAulaPost = await fetch("/api/aula/create/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(formData),
+          });
+          if (responseAulaPost.ok) {
+            toast.success("Parabéns pelo avanço!");
+            setTimeout(() => {
+              router.push("/curso");
+            }, 2000);
           } else {
             console.error(
-              "Erro ao fazer requisição para a api/aula/updade",
-              responseAula.statusText
+              "Erro ao fazer requisição da api aula",
+              responseAulaPost.statusText
             );
           }
-        } catch (error) {
+        } else {
           console.error(
-            "Erro ao fazer a requisição para api/aula/update",
-            error
+            "Erro ao fazer requisição para a api/aula/updade",
+            responseAula.statusText
           );
         }
-      } else {
-        console.error("Usuário nulo ou em formato não suportado");
+      } catch (error) {
+        console.error("Erro ao fazer a requisição para api/aula/update", error);
       }
     } else {
-      toast.error(
-        "Por favor, preencha todos os campos, assista ao vídeo antes de avançar. "
-      );
+      console.error("Usuário nulo ou em formato não suportado");
     }
   };
 
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
-    if (!videoWatched || !formData) {
-      toast.error("Por favor, assista ao vídeo e preencha todos os campos obrigatórios.");
-    } else {
+
     try {
       const token = localStorage.getItem("@TOKEN");
       const decodedToken = jwt.decode(token as string) as JwtPayload;
 
-      const verifyCurso = await fetch(`api/curso/list/id/${idAula.id}`, {
-        method: "GET",
-      });
-   
+      const verifyCurso = await fetch(
+        `/api/relations/${decodedToken.id}/${id}`
+      );
 
-      if (verifyCurso.ok) {
-        const userData = await verifyCurso.json();
-        if (userData.data.curso) {
-          toast.success("Bom demais ter você aqui novamente");
-          setTimeout(() => {
-            router.push("/curso");
-          }, 2000);
-        } else {
-          handleRouter();
-        }
-      } else {
-        console.error(
-          "Erro ao fazer a requisição para api/curso/list/id:",
-          verifyCurso.statusText
+      if (!verifyCurso.ok) {
+        throw new Error(
+          `Erro ao fazer a requisição para api/curso/list/id: ${verifyCurso.statusText}`
         );
+      }
+
+      const userData = await verifyCurso.json();
+
+      if (userData.clear) {
+        toast.success("Bom demais ter você aqui novamente");
+        setTimeout(() => {
+          router.push("/curso");
+        }, 2000);
+      } else {
+        handleRouter();
       }
     } catch (error) {
       console.error("Erro ao fazer a requisição para api/curso/list/id", error);
     }
-  }
   };
 
   if (!aula) {
     return <h1>Carregando...</h1>;
   }
-
+  if (!hasToken) {
+    return <h1>Realize login </h1>;
+  }
   return (
     <AliancaContainer>
       <header>
@@ -202,7 +201,13 @@ export const CursoID = () => {
         </div>
       </header>
       <div className="container">
-        <h1>Olá, usuário</h1>
+        <h1>
+          Olá,{" "}
+          {user && typeof user === "object" && "name" in user
+            ? (user as JwtPayload).name
+            : ""}
+        </h1>
+
         <h3>
           Muito bom ver você aqui buscando se desenvolver e crescer como
           empresário.
@@ -218,10 +223,10 @@ export const CursoID = () => {
             />
           )}
           <form
-          onSubmit={(e) => {
-            e.preventDefault(); 
-            handleFormSubmit(e);
-          }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleFormSubmit(e);
+            }}
           >
             <label htmlFor={aula["pergunta 01"]}>{aula["pergunta 01"]}</label>
             <textarea

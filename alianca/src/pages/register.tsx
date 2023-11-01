@@ -73,7 +73,7 @@ export const Register = () => {
 
     try {
       setButtonClicked(true);
-      const response = await fetch("/api/Create", {
+      const response = await fetch("/api/relations/create", {
         method: "POST",
         body: JSON.stringify(formData),
         headers: {

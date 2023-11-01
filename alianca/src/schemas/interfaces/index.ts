@@ -5,7 +5,7 @@ interface IButtonProps {
   disable?: boolean;
 }
 interface IRegisterData {
-  id?: string;
+  id: string;
   name: string;
   email: string;
   whatsapp: string;
@@ -18,6 +18,7 @@ interface IRegisterData {
   aula3: boolean;
 }
 interface ILeadResponse {
+  aulas: any;
   ref: {
     id: string;
   };

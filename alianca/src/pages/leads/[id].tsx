@@ -8,13 +8,13 @@ import { useEffect, useState } from "react";
 globalStyle();
 
 interface Lead {
-  aulas: Record<string, any>; // Defina o tipo de aulas como um objeto com chaves dinâmicas
+  aulas: Record<string, any>;
   id: string;
   name: string;
   email: string;
   whatsapp: string;
   segmento: string;
-  colaboradores: string; // Alterei para string
+  colaboradores: string;
   faturamento: string;
 }
 

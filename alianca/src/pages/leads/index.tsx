@@ -49,7 +49,7 @@ export const Leads = () => {
       return;
     }
 
-    fetch("/api/getAll")
+    fetch("/api/relations/list")
       .then((response) => response.json())
       .then((data) => {
         const leadData = data.data;
