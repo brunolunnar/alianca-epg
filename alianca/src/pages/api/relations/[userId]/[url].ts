@@ -13,9 +13,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "GET") {
     try {
       const userId = req.query.userId as string;
-      const aulaId = req.query.aulaId as string;
+      const url = req.query.url as string;
 
-   
       const userAula = await faunaClient.query<any>(
         query.Let(
           {
@@ -23,7 +22,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             aulas: query.Select(["data", "aulas"], query.Get(query.Var("userRef"))),
             aula: query.Filter(
               query.Var("aulas"),
-              query.Lambda("a", query.Equals(query.Select("id", query.Var("a")), aulaId))
+              query.Lambda("a", query.Equals(query.Select("url", query.Var("a")), url))
             ),
           },
           query.If(

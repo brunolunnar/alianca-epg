@@ -18,6 +18,7 @@ interface IRegisterData {
   aula3: boolean;
 }
 interface ILeadResponse {
+  email: any;
   aulas: any;
   ref: {
     id: string;

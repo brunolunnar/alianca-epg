@@ -12,17 +12,23 @@ const faunaClient = new Client({
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     try {
-        
       const data = req.body;
+      const courseCollection = query.Collection("curso");
+
       const response = await faunaClient.query<any>(
-        query.Create(query.Collection("curso"), {
+        query.Count(query.Documents(courseCollection))
+      );
+      
+      const urlCounter = response + 1;
+      data.url = `aula-0${urlCounter}`;
+      const createResponse = await faunaClient.query<any>(
+        query.Create(courseCollection, {
           data: data,
         })
       );
-
       res.status(200).json({
         message: "Cadastro realizado com sucesso!",
-        data: { id: response.ref.id, ...data },
+        data: { id: createResponse.ref.id, ...data },
       });
     } catch (error) {
       console.log(error);

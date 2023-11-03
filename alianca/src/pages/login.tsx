@@ -31,7 +31,7 @@ export const Login = () => {
       if (decodedToken && decodedToken.isAdmin) {
         router.push("/leads");
       } else if (decodedToken && !decodedToken.isAdmin) {
-        router.push("/alianca/aula01");
+        router.push("/curso");
       } else {
         console.log("Erro de autenticação:", response.data.error);
       }
@@ -43,7 +43,7 @@ export const Login = () => {
     const token = localStorage.getItem("@TOKEN");
 
     if (token) {
-      router.push("/alianca/aula01");
+      router.push("/curso/aula-01");
     }
   }, []);
   return (

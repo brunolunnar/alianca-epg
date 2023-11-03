@@ -24,7 +24,6 @@ async function createIndexIfNotExists() {
     console.error(error);
   }
 }
-
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "GET") {
     try {
@@ -45,7 +44,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         )
       );
 
-      const data = response.data.map((item: any) => item.data);
+      const data = response.data.map((item: any) => {
+        // Remove o campo "email" de cada objeto
+        const { email, ...rest } = item.data;
+        return rest;
+      });
 
       res.status(200).json({ data });
     } catch (error) {

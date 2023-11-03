@@ -18,7 +18,9 @@ interface AulaData {
   video: string;
   "pergunta 01": string;
   "pergunta 02": string;
+
 }
+
 export const CursoID = () => {
   const [aula, setAula] = useState<AulaData | null>(null);
   const [idAula, setIdAula] = useState<AulaData>({
@@ -35,13 +37,15 @@ export const CursoID = () => {
   const [videoWatched, setVideoWatched] = useState(false);
   const videoRef = useRef(null);
 
+
   const handleVideoEnd = () => {
     setVideoWatched(true);
   };
   const router = useRouter();
-  const { id } = router.query;
+  const { url } = router.query;
+ 
 
-  //efect para capturar token
+
   useEffect(() => {
     const token = localStorage.getItem("@TOKEN");
     const decodecToken = jwt.decode(token as string) as JwtPayload;
@@ -53,18 +57,16 @@ export const CursoID = () => {
     }
   }, []);
 
-  //efect para pegar informações do curso(aulas)
+
   useEffect(() => {
-    if (id) {
-      fetch(`/api/curso/list/${id as string}`)
+    if (url) {
+      fetch(`/api/curso/list/${url as string}`)
         .then((response) => response.json())
         .then((data: { data: AulaData }) => {
+          console.log('curso por url:', url)
           setAula(data.data);
-          setFormData({
-            [data.data["pergunta 01"]]: "",
-            [data.data["pergunta 02"]]: "",
-          });
-
+     
+  
           if (data.data.curso) {
           }
         })
@@ -72,10 +74,11 @@ export const CursoID = () => {
           console.error("Erro ao buscar detalhes do curso", error)
         );
     }
-  }, [id]);
+  }, [url]);
+  
 
-  //efect para capturar a aula por email, para depois conseguir capirutar por id
-  //apenas um teste
+
+
   useEffect(() => {
     const token = localStorage.getItem("@TOKEN");
     const decodecToken = jwt.decode(token as string) as JwtPayload;
@@ -93,20 +96,28 @@ export const CursoID = () => {
   }, []);
 
   const handleRouter = async () => {
-    if (!(hasToken && formData && videoWatched)) {
+    if (!(hasToken && videoWatched)) {
       toast.error(
         "Por favor, assista ao vídeo e preencha todos os campos obrigatórios."
       );
       return;
     }
-
+  
+    if (aula && (!formData[aula["pergunta 01"]] || !formData[aula["pergunta 02"]])) {
+      toast.error(
+        "Por favor, preencha todos os campos do formulário antes de prosseguir."
+      );
+      return;
+    }
+    
+  
     if (user && typeof user !== "string" && user.id) {
       try {
         const token = localStorage.getItem("@TOKEN");
         const decodedToken = jwt.decode(token as string) as JwtPayload;
 
         const responseAula = await fetch(
-          `/api/relations/update/${decodedToken.id}/${id}`,
+          `/api/relations/update/${decodedToken.id}/${url}`,
           {
             method: "PATCH",
           }
@@ -135,7 +146,7 @@ export const CursoID = () => {
           }
         } else {
           console.error(
-            "Erro ao fazer requisição para a api/aula/updade",
+            "Erro ao fazer requisição para a api/aula/update",
             responseAula.statusText
           );
         }
@@ -155,9 +166,9 @@ export const CursoID = () => {
       const decodedToken = jwt.decode(token as string) as JwtPayload;
 
       const verifyCurso = await fetch(
-        `/api/relations/${decodedToken.id}/${id}`
+        `/api/relations/${decodedToken.id}/${url}`
       );
-
+    
       if (!verifyCurso.ok) {
         throw new Error(
           `Erro ao fazer a requisição para api/curso/list/id: ${verifyCurso.statusText}`
@@ -165,6 +176,7 @@ export const CursoID = () => {
       }
 
       const userData = await verifyCurso.json();
+      console.log(userData)
 
       if (userData.clear) {
         toast.success("Bom demais ter você aqui novamente");
@@ -231,7 +243,7 @@ export const CursoID = () => {
             <label htmlFor={aula["pergunta 01"]}>{aula["pergunta 01"]}</label>
             <textarea
               name={aula["pergunta 01"]}
-              value={formData[aula["pergunta 01"]] || ""}
+              value={formData[aula["pergunta 01"]] }
               onChange={(e) =>
                 setFormData({
                   ...formData,
@@ -242,7 +254,7 @@ export const CursoID = () => {
             <label htmlFor={aula["pergunta 02"]}>{aula["pergunta 02"]}</label>
             <textarea
               name={aula["pergunta 02"]}
-              value={formData[aula["pergunta 02"]] || ""}
+              value={formData[aula["pergunta 02"]] }
               onChange={(e) =>
                 setFormData({
                   ...formData,

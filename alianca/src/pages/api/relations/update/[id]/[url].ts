@@ -13,9 +13,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "PATCH") {
     try {
       const { id } = req.query;
-      const aulaId: string = req.query.aulaId as string;
-
-     
+      const url: string = req.query.url as string;
 
       const updateUserResponse = await faunaClient.query<any>(
         query.Update(
@@ -31,8 +29,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                   ["aula"],
                   query.If(
                     query.Equals(
-                      query.Select(["id"], query.Var("aula")),
-                      aulaId
+                      query.Select(["url"], query.Var("aula")),
+                      url
                     ),
                     query.Merge(query.Var("aula"), { clear: true }),
                     query.Var("aula")
