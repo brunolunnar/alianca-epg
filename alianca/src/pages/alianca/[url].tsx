@@ -115,7 +115,7 @@ export const CursoID = () => {
                       currentAulaNumber.toString(),
                       nextAulaNumber.toString()
                     );
-                    router.push(`/curso/${nextURL}`);
+                    router.push(`/alianca/${nextURL}`);
                     setTimeout(() => {
                       window.location.reload();
                     }, 800);
@@ -188,7 +188,7 @@ export const CursoID = () => {
                 currentAulaNumber.toString(),
                 nextAulaNumber.toString()
               );
-              router.push(`/curso/${nextURL}`);
+              router.push(`/alianca/${nextURL}`);
               setTimeout(() => {
                 window.location.reload();
               }, 800);

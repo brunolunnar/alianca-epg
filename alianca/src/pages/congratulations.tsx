@@ -23,7 +23,7 @@ export const Congratulations = () => {
   }, []);
 
   const handleRouter = () => {
-    router.push("/");
+    router.push("https://api.whatsapp.com/message/VTC5UW6LMRQLN1?autoload=1&app_absent=0");
   };
 
   return (

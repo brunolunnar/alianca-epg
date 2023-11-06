@@ -38,7 +38,7 @@ export const Login = () => {
       } else if (decodedToken && !decodedToken.isAdmin) {
         toast.success(`Bem vindo, ${decodedToken.name}!`);
         setTimeout(() => {
-          router.push("/curso/aula-1");
+          router.push("/alianca/aula-1");
         }, 2000);
       } else {
         toast.error("Email inválido.");
@@ -53,7 +53,7 @@ export const Login = () => {
     const token = localStorage.getItem("@TOKEN");
 
     if (token) {
-      router.push("/curso/aula-1");
+      router.push("/alianca/aula-1");
     }
   }, []);
   return (
