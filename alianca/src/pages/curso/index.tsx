@@ -9,13 +9,13 @@ export const Curso = () => {
 
   const router = useRouter();
 
-  
   const handleRouter = (id: any) => {
-  
-      return router.push(`/curso/${id}`);
-
+    return router.push(`/curso/${id}`);
   };
-
+  const handleLogout =()=>{
+      localStorage.removeItem("@TOKEN")
+      return router.push('login')    
+  }
   useEffect(() => {
     const token = localStorage.getItem("@TOKEN");
     const decodeToken = jwt.decode(token as string) as JwtPayload;
@@ -24,7 +24,7 @@ export const Curso = () => {
       .then((data) => {
         const clearData = data.aulas;
         setClear(clearData);
-        console.log(clearData)
+       
       })
       .catch((error) => console.error("Erro ao buscar os cursos", error));
   }, []);
@@ -40,7 +40,9 @@ export const Curso = () => {
           </li>
         ))}
       </ul>
+      <button onClick={handleLogout}>logout</button>
     </div>
+    
   );
 };
 export default Curso;

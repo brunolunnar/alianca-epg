@@ -95,6 +95,7 @@ export const Register = () => {
           formData.colaboradores,
           formData.segmento
         );
+        toast.success("Parabéns pela iniciativa.")
         setTimeout(() => router.push("/login"), 2000);
       }
     } catch (error) {

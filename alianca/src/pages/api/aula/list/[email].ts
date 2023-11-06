@@ -12,14 +12,20 @@ const faunaClient = new Client({
 
 async function createIndexIfNotExists() {
   try {
-    await faunaClient.query(
-      query.CreateIndex({
-        name: "index_email",
-        source: query.Collection("aula"),
-        terms: [{ field: ["data", "email"] }],
-        unique: false,
-      })
+    const indexExists = await faunaClient.query(
+      query.Exists(query.Index("index_email"))
     );
+
+    if (!indexExists) {
+      await faunaClient.query(
+        query.CreateIndex({
+          name: "index_email",
+          source: query.Collection("aula"),
+          terms: [{ field: ["data", "email"] }],
+          unique: false,
+        })
+      );
+    }
   } catch (error) {
     console.error(error);
   }

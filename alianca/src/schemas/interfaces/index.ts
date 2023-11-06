@@ -45,3 +45,27 @@ interface IQuestion03{
   "Por que valeu a pena essa aula": string;
   "Quais decisões você toma": string;
 }
+interface AulaData {
+  id: string;
+  curso: boolean;
+  title: string;
+  video: string;
+  "pergunta 01": string;
+  "pergunta 02": string;
+
+}
+
+interface Lead {
+  email: any;
+  data: any;
+  id: string;
+  name: string;
+  segmento: string;
+  colaboradores: number;
+  faturamento: string;
+}
+interface DecodedToken {
+  email: string;
+  name: string;
+  isAdmin: boolean;
+}

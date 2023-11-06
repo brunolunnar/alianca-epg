@@ -14,6 +14,16 @@ export const LeadIdContainer = styled('main',{
         flexDirection:'column',
         gap:'2rem'
     },
+    '.response':{
+      padding:'10x',
+      margin:' 10px 0',
+      display:'flex',
+      flexDirection:'column',
+      gap:'10px' 
+    },
+    '.response strong':{
+      color:'$branch'
+    },
     ".logo": {
         width: "200px",
         height: "auto",

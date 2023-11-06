@@ -9,20 +9,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 
 globalStyle();
 
-interface Lead {
-  email: any;
-  data: any;
-  id: string;
-  name: string;
-  segmento: string;
-  colaboradores: number;
-  faturamento: string;
-}
-interface DecodedToken {
-  email: string;
-  name: string;
-  isAdmin: boolean;
-}
+
 export const Leads = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
@@ -61,10 +48,11 @@ export const Leads = () => {
 
   const handleSearch = (searchText: string) => {
     const filtered = leads.filter((lead) =>
-      lead.name.toLowerCase().includes(searchText.toLowerCase())
+      lead.name && lead.name.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredLeads(filtered);
   };
+  
 
   if (!isAdmin) {
     return (
@@ -95,7 +83,7 @@ export const Leads = () => {
           <p>Faturamento</p>
         </div>
         {filteredLeads.map((lead) => (
-          <li key={lead.email}>
+          <li key={lead.id}>
             <p>{lead.name}</p>
             <p>{lead.segmento}</p>
             <p>{lead.colaboradores}</p>

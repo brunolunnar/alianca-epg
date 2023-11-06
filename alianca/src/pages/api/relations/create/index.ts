@@ -37,9 +37,13 @@ export async function createUniqueEmailIndex() {
     console.error('Erro ao criar o índice "unique_email":', error);
   }
 }
+
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     try {
+      // Crie o índice de email único se ele não existir
+      await createUniqueEmailIndex();
+
       const data = req.body;
 
       if (

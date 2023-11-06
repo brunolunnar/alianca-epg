@@ -7,6 +7,9 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import jwt from "jsonwebtoken";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { decode } from "punycode";
 
 globalStyle();
 
@@ -23,19 +26,26 @@ export const Login = () => {
 
       if (response.status === 200) {
         localStorage.setItem("@TOKEN", response.data.token);
+     
       }
       const decodedToken = jwt.decode(response.data.token) as {
+        name: any;
         isAdmin: boolean;
       } | null;
 
       if (decodedToken && decodedToken.isAdmin) {
         router.push("/leads");
       } else if (decodedToken && !decodedToken.isAdmin) {
-        router.push("/curso");
+        toast.success(`Bem vindo, ${decodedToken.name}!`);
+        setTimeout(() => {
+          router.push("/curso/aula-1");
+        }, 2000);
       } else {
+        toast.error("Email inválido.");
         console.log("Erro de autenticação:", response.data.error);
       }
     } catch (error) {
+      toast.error("Email inválido.");
       console.error("Erro ao realizar o login:", error);
     }
   };
@@ -43,7 +53,7 @@ export const Login = () => {
     const token = localStorage.getItem("@TOKEN");
 
     if (token) {
-      router.push("/curso/aula-01");
+      router.push("/curso/aula-1");
     }
   }, []);
   return (
@@ -60,6 +70,16 @@ export const Login = () => {
           Confirmar
         </Button>
       </form>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        closeButton={false}
+        rtl={false}
+        theme="dark"
+      />
     </LoginContainer>
   );
 };

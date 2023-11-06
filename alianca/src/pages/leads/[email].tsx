@@ -16,7 +16,7 @@ import {
 
 globalStyle();
 
-interface Lead {
+interface ILeadId {
   map(
     arg0: (
       objeto: {
@@ -43,7 +43,7 @@ interface Lead {
   colaboradores: string;
   faturamento: string;
 }
-///api/aula/list/bruno1000@mail.com
+
 interface IQuestion {
   id: string;
   title: string;
@@ -52,11 +52,11 @@ interface IQuestion {
 }
 export const LeadsId = () => {
   const router = useRouter();
-  const { email } = router.query; // Acessar a propriedade 'email' da query
+  const { email } = router.query; 
 
-  const [data, setData] = useState<Lead | null>(null);
+  const [data, setData] = useState<ILeadId | null>(null);
 
-  const [responseQuestion, setResponseQuestion] = useState<Lead | null>(null);
+  const [responseQuestion, setResponseQuestion] = useState<ILeadId | null>(null);
 
   useEffect(() => {
     if (email) {
@@ -103,23 +103,15 @@ export const LeadsId = () => {
                 responseQuestion.map(
                   (
                     objeto: {
-                      [x: string]:
-                        | string
-                        | number
-                        | boolean
-                        | ReactElement<any, string | JSXElementConstructor<any>>
-                        | Iterable<ReactNode>
-                        | ReactPortal
-                        | PromiseLikeOfReactNode
-                        | null
-                        | undefined;
+                      [x: string]:any
                     },
                     index: Key | null | undefined
                   ) => (
                     <div key={index}>
                       {Object.keys(objeto).map((chave) => (
-                        <div key={chave}>
-                          <strong>{chave}:</strong> {objeto[chave]}
+                        <div className="response" key={chave}>
+                          <strong>{chave}:</strong>
+                          <p>{objeto[chave]}</p>
                         </div>
                       ))}
                     </div>

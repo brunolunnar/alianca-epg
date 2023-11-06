@@ -9,23 +9,29 @@ const faunaClient = new Client({
   secret: process.env.SECRET_KEY,
 });
 
-async function createUniqueUrlIndex() {
+async function createUniqueUrlIndexIfNotExists() {
   try {
-    await faunaClient.query(
-      query.CreateIndex({
-        name: "unique_url",
-        source: query.Collection("curso"),
-        terms: [{ field: ["data", "url"] }],
-        unique: true,
-      })
+    const indexExists = await faunaClient.query(
+      query.Exists(query.Index("unique_url"))
     );
-    console.log('Índice "unique_url" criado com sucesso.');
+
+    if (!indexExists) {
+      await faunaClient.query(
+        query.CreateIndex({
+          name: "unique_url",
+          source: query.Collection("curso"),
+          terms: [{ field: ["data", "url"] }],
+          unique: true,
+        })
+      );
+      console.log('Índice "unique_url" criado com sucesso.');
+    }
   } catch (error) {
     console.error('Erro ao criar o índice "unique_url":', error);
   }
 }
 
-createUniqueUrlIndex();
+createUniqueUrlIndexIfNotExists();
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "GET") {

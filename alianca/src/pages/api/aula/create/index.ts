@@ -46,15 +46,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             })
           );
 
-          await faunaClient.query(
-            query.Create(query.Collection("leads"), {
-              data: {
-                campoAula: response.data.campoAula,
-                // Adicione outros campos da coleção "leads" conforme necessário
-              },
-            })
-          );
-
+    
           res.status(200).json({
             Aula01: {
               email,
