@@ -20,7 +20,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       );
       
       const urlCounter = response + 1;
-      data.url = `aula-0${urlCounter}`;
+      data.url = `aula-${urlCounter}`;
       const createResponse = await faunaClient.query<any>(
         query.Create(courseCollection, {
           data: data,

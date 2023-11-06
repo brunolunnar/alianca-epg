@@ -35,6 +35,7 @@ export const CursoID = () => {
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
   const [hasToken, setHasToken] = useState<any>(false);
   const [videoWatched, setVideoWatched] = useState(false);
+  const [listUser, setListUser] = useState<any>()
   const videoRef = useRef(null);
 
 
@@ -44,8 +45,25 @@ export const CursoID = () => {
   const router = useRouter();
   const { url } = router.query;
  
-
-
+  useEffect(() => {
+    const token = localStorage.getItem("@TOKEN");
+    const decodecToken = jwt.decode(token as string) as JwtPayload;
+    if (url) {
+      fetch(`/api/relations/list/${decodecToken.id as string}`)
+        .then((response) => response.json())
+        .then((data: { data: AulaData }) => {
+          
+          setAula(data.data);
+     
+  
+          if (data.data.curso) {
+          }
+        })
+        .catch((error) =>
+          console.error("Erro ao buscar detalhes do curso", error)
+        );
+    }
+  }, [url]);
   useEffect(() => {
     const token = localStorage.getItem("@TOKEN");
     const decodecToken = jwt.decode(token as string) as JwtPayload;
@@ -63,7 +81,7 @@ export const CursoID = () => {
       fetch(`/api/curso/list/${url as string}`)
         .then((response) => response.json())
         .then((data: { data: AulaData }) => {
-          console.log('curso por url:', url)
+          
           setAula(data.data);
      
   
@@ -135,9 +153,22 @@ export const CursoID = () => {
           });
           if (responseAulaPost.ok) {
             toast.success("Parabéns pelo avanço!");
+            console.log(listUser)
             setTimeout(() => {
-              router.push("/curso");
+              const currentURL = url as string | undefined; // Suponhamos que 'url' seja a URL atual
+            
+              if (currentURL) {
+                // Use uma expressão regular para encontrar e incrementar o número na URL
+                const incrementedURL = currentURL.replace(/(\d+)$/, (match, number) => `${parseInt(number) + 1}`);
+            
+                // Redirecione para a URL incrementada
+                router.push(`/curso/${incrementedURL}`);
+                
+              }
             }, 2000);
+            
+            
+            
           } else {
             console.error(
               "Erro ao fazer requisição da api aula",
@@ -181,8 +212,15 @@ export const CursoID = () => {
       if (userData.clear) {
         toast.success("Bom demais ter você aqui novamente");
         setTimeout(() => {
-          router.push("/curso");
-        }, 2000);
+          const currentURL = url as string | undefined; // Suponhamos que 'url' seja a URL atual
+            
+          if (currentURL) {
+            // Use uma expressão regular para encontrar e incrementar o número na URL
+            const incrementedURL = currentURL.replace(/(\d+)$/, (match, number) => `${parseInt(number) + 1}`);
+        
+            // Redirecione para a URL incrementada
+            router.push(`/curso/${incrementedURL}`)
+        }}, 2000)
       } else {
         handleRouter();
       }
