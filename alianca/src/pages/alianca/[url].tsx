@@ -15,6 +15,7 @@ export const CursoID = () => {
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
   const [hasToken, setHasToken] = useState<any>(false);
   const [videoWatched, setVideoWatched] = useState(false);
+  const [lock, setLock] = useState<any>(0)
   const videoRef = useRef(null);
 
   const handleVideoEnd = () => {
@@ -49,7 +50,7 @@ export const CursoID = () => {
         );
     }
   }, [url]);
-
+console.log(lock)
   const handleRouter = async () => {
     if (!(hasToken && videoWatched)) {
       toast.error(
@@ -167,8 +168,8 @@ export const CursoID = () => {
 
         const userUrl = await fetch(`/api/relations/user/${decodedToken.id}`);
         const userData = await userUrl.json();
-        
         const totalAulas = userData.aulas.length;
+      
         
         setTimeout(() => {
           const currentURL = url as string | undefined;
@@ -216,7 +217,7 @@ export const CursoID = () => {
   }
   return (
     <AliancaContainer>
-      <HeaderClass />
+      <HeaderClass/>
 
       <div className="container">
         <h1>

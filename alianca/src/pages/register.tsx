@@ -82,7 +82,7 @@ export const Register = () => {
       });
 
       if (response.ok) {
-        toast.success("Registro feito com sucesso!");
+    
          sendRegistrationEmail(
           formData.name,
           formData.email
@@ -99,6 +99,7 @@ export const Register = () => {
         setTimeout(() => router.push("/login"), 2000);
       }
     } catch (error) {
+      toast.error("Erro ao fazer o registro.")
       console.error("Erro ao fazer o registro:", error);
       toast.error("Erro ao fazer o registro.");
     }
