@@ -9,7 +9,7 @@ if (!process.env.SECRET_KEY) {
 const faunaClient = new Client({
   secret: process.env.SECRET_KEY,
 });
-
+/* eslint import/no-anonymous-default-export: off */
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     try {

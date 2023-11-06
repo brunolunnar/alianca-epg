@@ -45,7 +45,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         );
   
         const leads = response.data.map((item) => ({
-          id: item.ref.id,
+          leadId: item.ref.id,
           ...item.data,
         }));
   
