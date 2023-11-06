@@ -39,7 +39,7 @@ export const Congratulations = () => {
           <b>Mais Leve</b> e com <b>Mais Lucro!</b>
         </h3>
       </section>
-      <Button OnClick={handleRouter} children={undefined}></Button>
+      <Button OnClick={handleRouter}></Button>
     </CongratulationsContainer>
   );
 };

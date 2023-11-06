@@ -75,7 +75,7 @@ export default function Home() {
             transformar sua trajetória empresarial!
           </article>
         </section>
-        <Button OnClick={handleRouterRegister} children={undefined} />
+        <Button OnClick={handleRouterRegister}  />
       </HomeContainer>
     </>
   );
